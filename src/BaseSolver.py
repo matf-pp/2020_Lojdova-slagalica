@@ -1,0 +1,77 @@
+import random
+
+import numpy as np
+
+from utils.utils import hash_state, unhash
+
+
+class BaseSolver:
+    r"""Base class for Loyd puzzle solver. It doesn't implement any algorithm
+    and it's expected that any of such extends this class. It provides general
+    and useful functions for easier implementation of algorithms.
+    """
+
+    def __init__(self, start_state):
+        r"""Initializing puzzle. It's assumed that final position has blank
+        tile in upper-left corner.
+
+        Arguments:
+            start_state (list): Starting state.
+        """
+
+        if not isinstance(start_state, list):
+            raise TypeError("Starting state has to be a list")
+
+        self._N = len(start_state)
+        self._N2 = self._N * self._N
+    
+        self._start_state = hash_state(start_state)
+
+        end_state = np.arange(self._N2).reshape((self._N, self._N))
+        self._end_state = hash_state(end_state)
+
+    def _get_neighbors(self, state):
+        r"""Returns all states that can be directly obtained from the given
+        state. These states are randomly shuffled before returned along with
+        proper (unit) weights.
+
+        Arguments:
+            state (str, list or np.ndarray): Given state.
+
+        Returns:
+            iterable (zip): Tuples of states and weights.
+        """ 
+
+        def _is_valid(r, c):
+            r"""Helper function for veryfing valid moves.
+
+            Arguments:
+                r, c: Row and column of blank tile.
+            """
+            return r >= 0 and c >= 0 and r < self._N and c < self._N
+
+        # state should be np.ndarray because of further calculations
+        if isinstance(state, str):
+            state = unhash(state)
+        elif isinstance(state, list):
+            state = np.array(state)
+
+        br, bc = np.squeeze(np.argwhere(state == 0))  # there is only one blank tile
+
+        # shuffling all possible moves
+        moves = [(br + 1, bc), (br - 1, bc), (br, bc + 1), (br, bc - 1)]
+        random.shuffle(moves)
+
+        neighbors = []
+
+        for xt_r, xt_c in moves:
+            if _is_valid(xt_r, xt_c):  # veryifing correctness
+                new_state = np.copy(state)
+                new_state[br, bc], new_state[xt_r, xt_c] = \
+                    new_state[xt_r, xt_c], new_state[br, bc]  # swapping
+                neighbors.append(hash_state(new_state))
+
+        return zip(neighbors, [1] * len(neighbors))
+
+    def solve(self):
+        raise NotImplementedError  # each subclass needs to implement this
