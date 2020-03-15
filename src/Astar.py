@@ -1,25 +1,30 @@
 import heapq
+import copy
 
 import numpy as np
 
 from src.BaseSolver import BaseSolver
-from utils.utils import is_solvable, h
+from utils.utils import hash_state, is_solvable, h
 
 
 class Astar(BaseSolver):
-    def __init__(self, start_state):
-        super().__init__(start_state)
+    def __init__(self, N):
+        super().__init__(N)
 
-    def solve(self):
+    def solve(self, start_state):
         r"""Solving given puzzle. This implementation assumes that given
         heurstics is consistent meaning that it's sufficient to relax distance
         the moment it becomes possible and such action will never be possible
         in the future. Manhattan distance is used.
 
+        Arguments:
+            start_state (list or np.ndarray): Starting state.
+
         Returns:
             flag, n_iters: Flag (True/False) if it's possible to solve the
-                puzzle and number of iterations in solving process."""    
+                puzzle and number of iterations in solving process."""
 
+        self._start_state = hash_state(start_state)
         n_iters = 0
 
         # trivial check if the given puzzle can be solved or not
@@ -44,7 +49,7 @@ class Astar(BaseSolver):
                 for next_state, w in self._get_neighbors(state):
                     cur_dist = dist[state] + w
 
-                    if cur_dist < dist.get(next_state, float("inf")):  # relaxing
+                    if cur_dist < dist.get(next_state, float("inf")):  # relax
                         dist[next_state] = cur_dist
                         parent[next_state] = state
                         cost_guess = cur_dist + h(next_state)
@@ -63,5 +68,5 @@ if __name__ == "__main__":
     ]
 
     for state in starting_states:
-        solver = Astar(state)
-        print(solver.solve())
+        solver = Astar(len(state))
+        print(solver.solve(state))

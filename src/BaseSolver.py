@@ -10,20 +10,15 @@ class BaseSolver:
     and it's expected that any of such extends this class. It provides general
     and useful functions for easier implementation of algorithms."""
 
-    def __init__(self, start_state):
+    def __init__(self, N):
         r"""Initializing puzzle. It's assumed that final position has blank
         tile in upper-left corner.
 
         Arguments:
             start_state (list): Starting state."""
 
-        if not isinstance(start_state, list):
-            raise TypeError("Starting state has to be a list")
-
-        self._N = len(start_state)
-        self._N2 = self._N * self._N
-    
-        self._start_state = hash_state(start_state)
+        self._N = N
+        self._N2 = N * N
 
         end_state = np.arange(self._N2).reshape((self._N, self._N))
         self._end_state = hash_state(end_state)
@@ -70,5 +65,5 @@ class BaseSolver:
 
         return zip(neighbors, [1] * len(neighbors))
 
-    def solve(self):
+    def solve(self, start_state):
         raise NotImplementedError  # each subclass needs to implement this
