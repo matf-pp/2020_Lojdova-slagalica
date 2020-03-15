@@ -23,7 +23,7 @@ def h(state):
     Arguments:
         state (str, np.ndarray or list): Given state.
     """
-    
+
     # state has to be either list of np.ndarray for further calculations
     if isinstance(state, str):
         state = unhash(state)

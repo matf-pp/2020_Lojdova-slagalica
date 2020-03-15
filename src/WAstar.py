@@ -7,9 +7,22 @@ from src.BaseSolver import BaseSolver
 from utils.utils import hash_state, is_solvable, h
 
 
-class Astar(BaseSolver):
-    def __init__(self, N):
+class WAstar(BaseSolver):
+    r"""Weighted A* algorithm. It's possible to use either static or dynamic
+    weighting. Both should reduce time needed to solve the puzzle."""
+
+    def __init__(self, N, static_weight=None, dynamic_weight=None):
+        r"""If `static_weight` is provided then `dynamic_weight` should not and
+        vice versa.
+
+        Arguments:
+            N (int): Size of puzzle.
+            static_weight (number): Multiplier of heurstics.
+            dynamic_weight (callable): Multiplier of heuristics."""
+
         super().__init__(N)
+        self._static_weight = static_weight
+        self._dynamic_weight = dynamic_weight
 
     def solve(self, start_state):
         r"""Solving given puzzle. This implementation assumes that given
@@ -52,7 +65,18 @@ class Astar(BaseSolver):
                     if cur_dist < dist.get(next_state, float("inf")):  # relax
                         dist[next_state] = cur_dist
                         parent[next_state] = state
-                        cost_guess = cur_dist + h(next_state)
+
+                        h_val = h(next_state)
+                        # weighting heuristics
+                        if self._static_weight is not None:
+                            cost_guess = cur_dist + \
+                                self._static_weight * h_val
+                        elif self._dynamic_weight is not None:
+                            h_val = h(next_state)
+                            cost_guess = cur_dist + \
+                                self._dynamic_weight(h_val) * h_val
+                        else:
+                            cost_guess = cur_dist + h_val
 
                         heapq.heappush(min_heap, (cost_guess, next_state))
 
@@ -65,6 +89,7 @@ if __name__ == "__main__":
         [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
     ]
 
+    static_weight = 1 + 4
     for state in starting_states:
-        solver = Astar(len(state))
+        solver = WAstar(len(state), static_weight=static_weight)
         print(solver.solve(state))
