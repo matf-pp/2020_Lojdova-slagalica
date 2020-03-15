@@ -42,7 +42,9 @@ class Astar(BaseSolver):
             _, state = heapq.heappop(min_heap)
 
             if state == self._end_state:
-                return True, n_iters
+                path = reconstruct_path(parent, state)
+
+                return True, (n_iters, path)
             else:
                 n_iters += 1
 
@@ -56,7 +58,7 @@ class Astar(BaseSolver):
 
                         heapq.heappush(min_heap, (cost_guess, next_state))
 
-        return False, n_iters
+        return False, (n_iters, None)
 
 
 if __name__ == "__main__":

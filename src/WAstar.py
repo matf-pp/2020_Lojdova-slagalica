@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 from src.BaseSolver import BaseSolver
-from utils.utils import hash_state, is_solvable, h
+from utils.utils import reconstruct_path, hash_state, is_solvable, h
 
 
 class WAstar(BaseSolver):
@@ -65,7 +65,9 @@ class WAstar(BaseSolver):
             _, state = heapq.heappop(min_heap)
 
             if state == self._end_state:
-                return True, n_iters
+                path = reconstruct_path(parent, state)
+
+                return True, (n_iters, path)
             else:
                 n_iters += 1
 
@@ -87,7 +89,7 @@ class WAstar(BaseSolver):
 
                         heapq.heappush(min_heap, (g_val + h_val, next_state))
 
-        return False, n_iters
+        return False, (n_iters, None)
 
 
 if __name__ == "__main__":

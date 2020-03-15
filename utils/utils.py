@@ -3,6 +3,16 @@ import numpy as np
 from permutation import Permutation
 
 
+def reconstruct_path(parent, state):
+    path = [state]
+
+    while parent[state] is not None:
+        state = parent[state]
+        path.append(state)
+
+    return path[::-1]
+
+
 def unhash(hash_val):
     r"""Mapping hashed value back into state's string.
 
