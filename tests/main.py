@@ -14,7 +14,8 @@ class TestSolver8(unittest.TestCase):
     def setUp(self):
         self._options = {
             "astar": lambda N: Astar(N),
-            "wastar": lambda N: WAstar(N, 5)
+            "wastar_static": lambda N: WAstar(N, 4, mode="static"),
+            "wastar_dynamic": lambda N: WAstar(N, 4, mode="dynamic")
         }
         self._solver_tag = sys.argv[1]
 
@@ -51,7 +52,8 @@ class TestSolver15(unittest.TestCase):
     def setUp(self):
         self._options = {
             "astar": lambda N: Astar(N),
-            "wastar": lambda N: WAstar(N, 5)
+            "wastar_static": lambda N: WAstar(N, 4, mode="static"),
+            "wastar_dynamic": lambda N: WAstar(N, 4, mode="dynamic")
         }
         self._solver_tag = sys.argv[1]
 
@@ -194,7 +196,7 @@ class TestSolver15(unittest.TestCase):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise RuntimeError("Solver tag is not provided")
-    elif sys.argv[1] not in ["astar", "wastar"]:
+    elif sys.argv[1] not in ["astar", "wastar_static", "wastar_dynamic"]:
         raise ValueError("Solver tag is inappropriate")
 
     suite8 = unittest.TestLoader().loadTestsFromTestCase(TestSolver8)
