@@ -8,7 +8,10 @@ def unhash(hash_val):
 
     Arguments:
         hash_val (int): Hash value of state.
-    """
+
+    Returns:
+        state (np.ndarray): State which hash is `hash_val`."""
+
     state = hash_val.split(':')
     state = [int(x) for x in state]
     N = int(np.round(np.sqrt(len(state))))
@@ -22,7 +25,9 @@ def h(state):
 
     Arguments:
         state (str, np.ndarray or list): Given state.
-    """
+
+    Returns:
+        cost (int): Manhattan distance between goal and given state."""
 
     # state has to be either list of np.ndarray for further calculations
     if isinstance(state, str):
@@ -49,7 +54,9 @@ def hash_state(state):
 
     Arguments:
         state (list or np.ndarray): Given state.
-    """
+
+    Returns:
+        hash value (str): State's hash value."""
 
     # flattening either 2D list or 2D np.ndarray
     if isinstance(state, list):
@@ -69,7 +76,10 @@ def is_solvable(state):
 
     Arguments:
         state (str, list or np.ndarray): Given state.
-    """
+
+    Returns:
+        flag (bool): True if it's possible to solve the puzzle and false
+            otherwise."""
 
     # np.ndarray is necessary for futher calculations
     if isinstance(state, str):

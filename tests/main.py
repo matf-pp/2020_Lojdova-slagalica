@@ -194,11 +194,11 @@ class TestSolver15(unittest.TestCase):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise RuntimeError("Solver tag is not provided")
-    elif sys.argv not in ["astar", "wastar"]:
+    elif sys.argv[1] not in ["astar", "wastar"]:
         raise ValueError("Solver tag is inappropriate")
 
     suite8 = unittest.TestLoader().loadTestsFromTestCase(TestSolver8)
     unittest.TextTestRunner(verbosity=2).run(suite8)
 
-    unittest.TextTestRunner(verbosity=2).run(suite15)
     suite15 = unittest.TestLoader().loadTestsFromTestCase(TestSolver15)
+    unittest.TextTestRunner(verbosity=2).run(suite15)
