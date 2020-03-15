@@ -18,8 +18,7 @@ class Astar(BaseSolver):
 
         Returns:
             flag, n_iters: Flag (True/False) if it's possible to solve the
-                puzzle and number of iterations in solving process.
-        """    
+                puzzle and number of iterations in solving process."""    
 
         n_iters = 0
 

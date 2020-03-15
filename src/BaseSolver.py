@@ -8,16 +8,14 @@ from utils.utils import hash_state, unhash
 class BaseSolver:
     r"""Base class for Loyd puzzle solver. It doesn't implement any algorithm
     and it's expected that any of such extends this class. It provides general
-    and useful functions for easier implementation of algorithms.
-    """
+    and useful functions for easier implementation of algorithms."""
 
     def __init__(self, start_state):
         r"""Initializing puzzle. It's assumed that final position has blank
         tile in upper-left corner.
 
         Arguments:
-            start_state (list): Starting state.
-        """
+            start_state (list): Starting state."""
 
         if not isinstance(start_state, list):
             raise TypeError("Starting state has to be a list")
@@ -39,8 +37,7 @@ class BaseSolver:
             state (str, list or np.ndarray): Given state.
 
         Returns:
-            iterable (zip): Tuples of states and weights.
-        """ 
+            iterable (zip): Tuples of states and weights."""
 
         def _is_valid(r, c):
             r"""Helper function for veryfing valid moves.
