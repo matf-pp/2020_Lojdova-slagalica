@@ -47,6 +47,22 @@ class TestSolver8(unittest.TestCase):
 
         self.assertEqual(result, True)
 
+    def test_hard_8_1(self):
+        start_state = [[8, 6, 7], [2, 5, 4], [3, 0, 1]]
+
+        solver = self._options[self._solver_tag](len(start_state))
+        result, _ = solver.solve(start_state)
+
+        self.assertEqual(result, True)
+
+    def test_hard_8_2(self):
+        start_state = [[6, 4, 7], [8, 5, 0], [3, 2, 1]]
+
+        solver = self._options[self._solver_tag](len(start_state))
+        result, _ = solver.solve(start_state)
+
+        self.assertEqual(result, True)
+
 
 class TestSolver15(unittest.TestCase):
     r"""Unit-testing class for 4x4 puzzles. Unit tests are separated based on
@@ -193,6 +209,16 @@ class TestSolver15(unittest.TestCase):
 
         solver = self._options[self._solver_tag](len(start_state))
         result, _ = solver.solve(start_state)
+
+        self.assertEqual(result, True)
+
+    def test_hard_15_1(self):
+        start_state = [[15, 14, 8, 12], [10, 11, 9, 13],
+                       [2, 6, 5, 1], [3, 7, 4, 0]]
+
+        solver = self._options[self._solver_tag](len(start_state))
+        result, stats = solver.solve(start_state)
+        print(stats[0], len(stats[1]))
 
         self.assertEqual(result, True)
 
