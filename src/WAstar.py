@@ -8,7 +8,7 @@ from utils.utils import reconstruct_path, hash_state, is_solvable, h
 
 
 class WAstar(BaseSolver):
-    r"""Weighted A* algorithm. It's possible to use either static or dynamic
+    r"""Weigthing A* algorithm. It's possible to use either static or dynamic
     weighting. Both should reduce time needed to solve the puzzle."""
 
     def __init__(self, N, weight, mode="none"):
@@ -50,7 +50,7 @@ class WAstar(BaseSolver):
 
         # trivial check if the given puzzle can be solved or not
         if not is_solvable(self._start_state):
-            return False, n_iters
+            return False, (n_iters, None)
 
         # initializing dictionaries for distances, parents and depth
         dist, parent, depth = {}, {}, {}

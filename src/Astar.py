@@ -4,10 +4,12 @@ import copy
 import numpy as np
 
 from src.BaseSolver import BaseSolver
-from utils.utils import hash_state, is_solvable, h
+from utils.utils import reconstruct_path, hash_state, is_solvable, h
 
 
 class Astar(BaseSolver):
+    r"""Standard A* algorithm."""
+
     def __init__(self, N):
         super().__init__(N)
 
@@ -29,7 +31,7 @@ class Astar(BaseSolver):
 
         # trivial check if the given puzzle can be solved or not
         if not is_solvable(self._start_state):
-            return False, n_iters
+            return False, (n_iters, None)
 
         # initializing dictionaries for distances and parents
         dist, parent = {}, {}
