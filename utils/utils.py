@@ -13,14 +13,14 @@ def reconstruct_path(parent, state):
     return path[::-1]
 
 
-def unhash(hash_val):
-    r"""Mapping hashed value back into state's string.
+def deserialize(hash_val):
+    r"""Deserialization of the given string.
 
     Arguments:
-        hash_val (int): Hash value of state.
+        hash_val (str): Serialized state.
 
     Returns:
-        state (np.ndarray): State which hash is `hash_val`."""
+        state (np.ndarray): Deserialized state."""
 
     state = hash_val.split(':')
     state = [int(x) for x in state]
@@ -41,7 +41,7 @@ def h(state):
 
     # state has to be either list of np.ndarray for further calculations
     if isinstance(state, str):
-        state = unhash(state)
+        state = deserialize(state)
 
     # calculating state's dimension
     if isinstance(state, np.ndarray):
@@ -58,15 +58,14 @@ def h(state):
     return cost
 
 
-def hash_state(state):
-    r"""Calculating hash value for the given state. It's basically 2D array
-    flattening.
+def serialize(state):
+    r"""Serializing given state. It's basically 2D array flattening.
 
     Arguments:
         state (list or np.ndarray): Given state.
 
     Returns:
-        hash value (str): State's hash value."""
+        hash value (str): Serialized state."""
 
     # flattening either 2D list or 2D np.ndarray
     if isinstance(state, list):
@@ -93,7 +92,7 @@ def is_solvable(state):
 
     # np.ndarray is necessary for futher calculations
     if isinstance(state, str):
-        state = unhash(state)
+        state = deserialize(state)
     elif isinstance(state, list):
         state = np.array(state)
 

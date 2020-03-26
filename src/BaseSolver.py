@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from utils.utils import hash_state, unhash
+from utils.utils import serialize, deserialize
 
 
 class BaseSolver:
@@ -21,7 +21,7 @@ class BaseSolver:
         self._N2 = N * N
 
         end_state = np.arange(self._N2).reshape((self._N, self._N))
-        self._end_state = hash_state(end_state)
+        self._end_state = serialize(end_state)
 
     def _get_neighbors(self, state):
         r"""Returns all states that can be directly obtained from the given
@@ -44,7 +44,7 @@ class BaseSolver:
 
         # state should be np.ndarray because of further calculations
         if isinstance(state, str):
-            state = unhash(state)
+            state = deserialize(state)
         elif isinstance(state, list):
             state = np.array(state)
 
@@ -61,7 +61,7 @@ class BaseSolver:
                 new_state = np.copy(state)
                 new_state[br, bc], new_state[xt_r, xt_c] = \
                     new_state[xt_r, xt_c], new_state[br, bc]  # swapping
-                neighbors.append(hash_state(new_state))
+                neighbors.append(serialize(new_state))
 
         return zip(neighbors, [1] * len(neighbors))
 

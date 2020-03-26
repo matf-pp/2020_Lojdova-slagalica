@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 from src.BaseSolver import BaseSolver
-from utils.utils import reconstruct_path, hash_state, is_solvable, h
+from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class WAstar(BaseSolver):
@@ -45,7 +45,7 @@ class WAstar(BaseSolver):
             flag, n_iters: Flag (True/False) if it's possible to solve the
                 puzzle and number of iterations in solving process."""
 
-        self._start_state = hash_state(start_state)
+        self._start_state = serialize(start_state)
         n_iters = 0
 
         # trivial check if the given puzzle can be solved or not
