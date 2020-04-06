@@ -131,7 +131,7 @@ dmypy.json
 # IDEs
 .vs/
 .vscode/
-,idea/
+.idea/
 
 # unittest generator
 *.txt
