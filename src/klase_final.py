@@ -191,7 +191,7 @@ class Slagalica:
                 #Drugo izmenjeno polje(trazim u ostatku liste)
                 for j in range(i+1,16):
                     if trenutno[j] != sledece[j]:
-                        index2   = j
+                        index2 = j
                         nova_vr2 = sledece[j]
                         break
                 break
