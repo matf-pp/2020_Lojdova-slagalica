@@ -280,7 +280,7 @@ if __name__ == "__main__":
         draw_puzzle(current_state)
 
         # get difference between current and next state
-        (index1, value1, index2, value2) = \
+        index1, value1, index2, value2 = \
             puzzle.razlike_stanja(puzzle.trenutno_stanje(),
                                   puzzle.sledece_stanje())
 
@@ -288,9 +288,9 @@ if __name__ == "__main__":
         move_direction = define_move_direction(index1, index2, value1, value2)
 
         # get fields for animation
-        (exchange_field, zero_field) = get_zero_and_exchange_field(index1,
-                                                                   index2,
-                                                                   value1)
+        exchange_field, zero_field = get_zero_and_exchange_field(index1,
+                                                                 index2,
+                                                                 value1)
 
         # define stop targets for animation
         target_x = exchange_field.x
