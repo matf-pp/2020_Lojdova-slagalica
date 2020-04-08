@@ -13,7 +13,7 @@ class Field:
         self._value = new_value
 
     def current_value(self):
-        return (self._value, self._x, self.y)
+        return (self._value, self._x, self._y)
 
 
 # ----------------------------------------------------
@@ -51,6 +51,9 @@ class Puzzle:
         return tmp_state_list
 
     def next_puzzle_state(self):
+        if self.is_last_state():
+            return None
+
         next_state = self._list_of_states[self._current_state_index+1]
         only_num = next_state.split(":")
 
@@ -159,18 +162,18 @@ class Puzzle:
         return (index2, new_val1, index1, new_val2)
 
     '''
-        Function only change values of two fields.
+        Function only changes values of two fields.
     '''
-    def promena_stanja(self):
+    def states_change(self):
 
         if(self.is_last_state()):
             return None
         else:
-            (index1, nova_vr1, index2, nova_vr2) = \
+            (index1, new_val1, index2, new_val2) = \
                 self.states_difference(
                     self.current_puzzle_state(), self.next_puzzle_state())
 
-            self.indeks_trenutnog += 1
-            self._fields[index1].promeni_vrednost(nova_vr1)
-            self._fields[index2].promeni_vrednost(nova_vr2)
+            self._current_state_index += 1
+            self._fields[index1].change_value(new_val1)
+            self._fields[index2].change_value(new_val2)
             self._fields = self.initialize_fields()
