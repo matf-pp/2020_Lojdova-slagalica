@@ -8,7 +8,8 @@ from Astar import *
 from IDAstar import *
 from BaseSolver import *
 from WAstar import *
-from Classes import *
+from Field import *
+from Puzzle import *
 
 
 PUZZLE_IMAGES_PATH = os.path.join(os.getcwd(), "src", "Numbers")

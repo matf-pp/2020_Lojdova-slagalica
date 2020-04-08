@@ -1,32 +1,13 @@
-class Field:
-    '''
-    (x,y)     - upper left point of field
-    value     - value(number) in that field
-    '''
-    def __init__(self, x, y, value):
-        self._x = x
-        self._y = y
-        self._value = value
-
-    def change_value(self, new_value):
-        self._value = new_value
-
-    def current_value(self):
-        return (self._value, self._x, self._y)
-
-
-# ----------------------------------------------------
+from Field import *
 
 
 class Puzzle:
-    '''
-    list_of_states - list of all puzzle states
-    (x,y)          - upper left point of puzzle
-    color          - color of fields in puzzle
-    size           - size of puzzle in pixels
-    '''
 
     def __init__(self, list_of_states, x, y, color, size):
+        r"""list_of_states - list of all puzzle states
+            (x,y)          - upper left point of puzzle
+            color          - color of fields in puzzle
+            size           - size of puzzle in pixels"""
         self._list_of_states = list_of_states
         self._x = x
         self._y = y
@@ -71,10 +52,9 @@ class Puzzle:
     def get_field_size(self):
         return self._size / 4
 
-    '''
-        Count fields coordinates realtive to puzzle coordinates and field size.
-    '''
     def get_all_coordinates(self):
+        r"""Count fields coordinates realtive to
+                puzzle coordinates and field size."""
         coords_list = []
 
         a = self.get_field_size()
@@ -94,7 +74,8 @@ class Puzzle:
 
         return coords_list
 
-    '''
+    def initialize_fields(self):
+        r"""
         Schedule of fields in puzzle:
 
         [0]  [1]  [2]  [3]
@@ -106,10 +87,8 @@ class Puzzle:
         Note: Field on position [5]
                     => It doesn't mean that field has value equals to number 5!
 
-        Field with value 0 is the field that is moving all the time.
-    '''
+        Field with value 0 is the field that is moving all the time."""
 
-    def initialize_fields(self):
         tmp_state = self.current_puzzle_state()
         coords_list = self.get_all_coordinates()
 
@@ -122,13 +101,12 @@ class Puzzle:
 
         return fields
 
-    '''
-        This function will return pair:
+    def current_puzzle_look(self):
+        r"""This function will return pair:
             (Field,img_name_for_that_field)
 
-            img_name_for_that_field = Field.value + "_" + self.color + ".png"
-    '''
-    def current_puzzle_look(self):
+            img_name = Field.value + "_" + self.color + '.png' """
+
         ret_list = []
         tmp_color = self.get_current_color()
 
@@ -140,28 +118,25 @@ class Puzzle:
 
         return ret_list
 
-    def states_difference(self, current, next):
+    def states_difference(self, current_st, next_st):
         for i in range(16):
-            if current[i] != next[i]:
+            if current_st[i] != next_st[i]:
                 # First changed field
                 index1 = i
-                new_val1 = next[i]
+                new_val1 = next_st[i]
 
                 # Second changed field
                 for j in range(i + 1, 16):
-                    if current[j] != next[j]:
+                    if current_st[j] != next_st[j]:
                         index2 = j
-                        new_val2 = next[j]
+                        new_val2 = next_st[j]
                         break
                 break
 
         return index2, new_val1, index1, new_val2
 
-    '''
-        Function only changes values of two fields.
-    '''
     def states_change(self):
-
+        r"""Function only changes values of two fields."""
         if self.is_last_state():
             return None
         else:
