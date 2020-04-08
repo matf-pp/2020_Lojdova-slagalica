@@ -1,10 +1,13 @@
 import heapq
-import copy
+import sys
+import os
 
 import numpy as np
 
-from src.BaseSolver import BaseSolver
-from utils.utils import reconstruct_path, serialize, is_solvable, h
+sys.path.extend([os.path.join(os.getcwd(), "src"),
+                 os.path.join(os.getcwd(), "utils")])
+from BaseSolver import BaseSolver
+from utils import reconstruct_path, serialize, is_solvable, h
 
 
 class WAstar(BaseSolver):
@@ -84,8 +87,8 @@ class WAstar(BaseSolver):
                         if self._mode == "static":
                             h_val *= (1 + self._weight) * h_val
                         else:
-                            h_val *= (1 + self._weight -
-                                      depth[next_state] / self._max_depth)
+                            h_smoothing = depth[next_state] / self._max_depth
+                            h_val *= (1 + self._weight - h_smoothing)
 
                         heapq.heappush(min_heap, (g_val + h_val, next_state))
 

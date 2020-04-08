@@ -1,10 +1,12 @@
 import unittest
 import argparse
 import sys
+import os
 
-from src.Astar import Astar
-from src.WAstar import WAstar
-from src.IDAstar import IDAstar
+sys.path.extend([os.path.join(os.getcwd(), "src")])
+from Astar import Astar
+from WAstar import WAstar
+from IDAstar import IDAstar
 
 valid_tags = ["astar", "wastar_static", "wastar_dynamic", "idastar"]
 

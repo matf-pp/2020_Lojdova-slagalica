@@ -1,16 +1,22 @@
 import pygame
 import time
+import sys
 import os
 
-from src.Astar import *
-from src.IDAstar import *
-from src.BaseSolver import *
-from src.WAstar import *
-from src.klase_final import *
+sys.path.extend([os.path.join(os.getcwd(), "src")])
+from Astar import *
+from IDAstar import *
+from BaseSolver import *
+from WAstar import *
+from Classes import *
 
 
 PUZZLE_IMAGES_PATH = os.path.join(os.getcwd(), "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
+WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
+SLEEP_DURATION = 0.0001
+PUZZLE_X, PUZZLE_Y = 30, 0
+PUZZLE_DIMENSION = 400
 
 # screen.blit("ime slike", x, y)
 # define color values
@@ -45,165 +51,169 @@ def get_zero_and_exchange_field(index1, index2, value1):
 
 
 def move_up(current_state, zero_field, exchange_field, target_y):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
-    while zero_field.y > target_y:
+    while zero_field._y > target_y:
         pygame.display.update()
-        time.sleep(0.01)
+        time.sleep(SLEEP_DURATION)
         for field in current_state:
-            value = field.vrednost
-            field_x, field_y = field.x, field.y
+            value = field._value
+            field_x, field_y = field._x, field._y
 
             if value == 0:
-                zero_field.y -= 2
-            elif value == exchange_field.vrednost:
-                exchange_field.y += 2
+                zero_field._y -= 2
+            elif value == exchange_field._value:
+                exchange_field._y += 2
                 screen.fill(white)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+exchange_field.x, height
-                                  + exchange_field.y))
+                screen.blit(img, (width + exchange_field._x,
+                                  height + exchange_field._y))
             else:
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+field_x, height+field_y))
+                screen.blit(img, (width + field_x,
+                                  height + field_y))
 
             fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 def move_down(current_state, zero_field, exchange_field, target_y):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
-    while zero_field.y < target_y:
+    while zero_field._y < target_y:
         pygame.display.update()
-        time.sleep(0.001)
+        time.sleep(SLEEP_DURATION)
         for field in current_state:
-            value = field.vrednost
-            field_x, field_y = field.x, field.y
+            value = field._value
+            field_x, field_y = field._x, field._y
 
             if value == 0:
-                zero_field.y += 2
+                zero_field._y += 2
                 screen.fill(white)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
-            elif value == exchange_field.vrednost:
-                exchange_field.y -= 2
+            elif value == exchange_field._value:
+                exchange_field._y -= 2
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+exchange_field.x, height +
-                                  exchange_field.y))
+                screen.blit(img, (width + exchange_field._x,
+                                  height + exchange_field._y))
             else:
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+field_x, height+field_y))
+                screen.blit(img, (width + field_x,
+                                  height + field_y))
 
             fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 def move_right(current_state, zero_field, exchange_field, target_x):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
-    while zero_field.x < target_x:
+    while zero_field._x < target_x:
         pygame.display.update()
-        time.sleep(0.001)
+        time.sleep(SLEEP_DURATION)
         for field in current_state:
-            value = field.vrednost
-            field_x, field_y = field.x, field.y
+            value = field._value
+            field_x, field_y = field._x, field._y
 
             if value == 0:
-                zero_field.x += 2
+                zero_field._x += 2
                 screen.fill(white)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
-            elif value == exchange_field.vrednost:
-                exchange_field.x -= 2
+            elif value == exchange_field._value:
+                exchange_field._x -= 2
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width + exchange_field.x, height +
-                                  exchange_field.y))
+                screen.blit(img, (width + exchange_field._x,
+                                  height + exchange_field._y))
             else:
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+field_x, height + field_y))
+                screen.blit(img, (width + field_x, height + field_y))
 
             fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 def move_left(current_state, zero_field, exchange_field, target_x):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
-    while zero_field.x > target_x:
+    while zero_field._x > target_x:
         pygame.display.update()
-        time.sleep(0.01)
+        time.sleep(SLEEP_DURATION)
         for field in current_state:
-            value = field.vrednost
-            field_x, field_y = field.x, field.y
+            value = field._value
+            field_x, field_y = field._x, field._y
 
             if value == 0:
-                zero_field.x -= 2
-            elif value == exchange_field.vrednost:
-                exchange_field.x += 2
+                zero_field._x -= 2
+            elif value == exchange_field._value:
+                exchange_field._x += 2
                 screen.fill(white)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+field_x, height+field_y))
+                screen.blit(img, (width + field_x,
+                                  height + field_y))
             else:
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                         str(value) + PUZZLE_IMAGES_EXT))
-                screen.blit(img, (width+field_x, height + field_y))
+                screen.blit(img, (width + field_x, height + field_y))
 
             fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 def draw_puzzle(current_state):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
     for field in current_state:
-        value = field.vrednost
-        field_x, field_y = field.x, field.y
+        value = field._value
+        field_x, field_y = field._x, field._y
 
         if value == 0:
             continue
 
-        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, str(value) +
-                                             PUZZLE_IMAGES_EXT))
-        screen.blit(img, (width+field_x, height+field_y))
+        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+                                             str(value) + PUZZLE_IMAGES_EXT))
+        screen.blit(img, (width + field_x, height + field_y))
 
         fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 def draw_puzzle_without_animation_fields(current_state, exchange_field):
-    width, height = puzzle_x, puzzle_y
+    width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
     for field in current_state:
-        value = field.vrednost
-        field_x, field_y = field.x, field.y
+        value = field._value
+        field_x, field_y = field._x, field._y
 
         if value == 0:
             continue
-        elif exchange_field.vrednost == value:
+        elif exchange_field._value == value:
             continue
         else:
             img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                     str(value) + PUZZLE_IMAGES_EXT))
-            screen.blit(img, (width+field_x, height+field_y))
+            screen.blit(img, (width + field_x,
+                              height + field_y))
 
         fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
 if __name__ == "__main__":
     pygame.init()
-    screen = pygame.display.set_mode((800, 640))
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
     starting_states = [
         # [[7, 1, 2], [0, 8, 3], [6, 4, 5]],
@@ -215,13 +225,13 @@ if __name__ == "__main__":
         states_list = solver.solve(state)[1][1]
         print(solver.solve(state))
 
-    puzzle_x, puzzle_y = 30, 0
-    puzzle_dimension = 400
-    puzzle = Slagalica(states_list, puzzle_x, puzzle_y, "plava",
-                       puzzle_dimension)
+    puzzle = Puzzle(states_list,
+                    PUZZLE_X, PUZZLE_Y,
+                    "plava",
+                    PUZZLE_DIMENSION)
 
     loop_active = True
-    current_state = puzzle.polja_slagalice
+    current_state = puzzle._fields
     while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -231,9 +241,9 @@ if __name__ == "__main__":
         draw_puzzle(current_state)
 
         # get difference between current and next state
-        index1, value1, index2, value2 = \
-            puzzle.razlike_stanja(puzzle.trenutno_stanje(),
-                                  puzzle.sledece_stanje())
+        index1, value1, index2, value2 = puzzle.states_difference(
+            puzzle.current_puzzle_state(),
+            puzzle.next_puzzle_state())
 
         # define direction of field movement
         move_direction = define_move_direction(index1, index2, value1, value2)
@@ -244,8 +254,7 @@ if __name__ == "__main__":
                                                                  value1)
 
         # define stop targets for animation
-        target_x = exchange_field.x
-        target_y = exchange_field.y
+        target_x, target_y = exchange_field._x, exchange_field._y
 
         # move zero field to seted direction
         if move_direction == up:
@@ -261,6 +270,6 @@ if __name__ == "__main__":
 
         # redisplay, wait and iterate through list of statets
         pygame.display.update()
-        time.sleep(0.3)
-        puzzle.promena_stanja()
-        current_state = puzzle.polja_slagalice
+        time.sleep(SLEEP_DURATION)
+        puzzle.states_change()
+        current_state = puzzle._fields

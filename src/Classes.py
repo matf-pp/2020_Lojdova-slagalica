@@ -1,5 +1,4 @@
 class Field:
-
     '''
     (x,y)     - upper left point of field
     value     - value(number) in that field
@@ -20,7 +19,6 @@ class Field:
 
 
 class Puzzle:
-
     '''
     list_of_states - list of all puzzle states
     (x,y)          - upper left point of puzzle
@@ -46,7 +44,7 @@ class Puzzle:
 
         tmp_state_list = []
         for i in range(16):
-            tmp_state_list.append(int(only_num[i], 10))
+            tmp_state_list.append(int(only_num[i]))
 
         return tmp_state_list
 
@@ -54,17 +52,17 @@ class Puzzle:
         if self.is_last_state():
             return None
 
-        next_state = self._list_of_states[self._current_state_index+1]
+        next_state = self._list_of_states[self._current_state_index + 1]
         only_num = next_state.split(":")
 
         next_state_list = []
         for i in range(16):
-            next_state_list.append(int(only_num[i], 10))
+            next_state_list.append(int(only_num[i]))
 
         return next_state_list
 
     def is_last_state(self):
-        if(self._current_state_index == self._number_of_states-1):
+        if(self._current_state_index == self._number_of_states - 1):
             return True
 
     def get_current_color(self):
@@ -81,19 +79,18 @@ class Puzzle:
 
         a = self.get_field_size()
 
-        row = 1
-        colon = 0
+        row, col = 1, 0
         for i in range(16):
-            tmp_x = self._x + colon*a
-            tmp_y = self._y + row*a
+            tmp_x = self._x + col * a
+            tmp_y = self._y + row * a
 
             coords_list.append((tmp_x, tmp_y))
 
-            if (i+1) % 4 == 0:
+            if (i + 1) % 4 == 0:
                 row += 1
-                colon = -1
+                col = -1
 
-            colon += 1
+            col += 1
 
         return coords_list
 
@@ -116,15 +113,14 @@ class Puzzle:
         tmp_state = self.current_puzzle_state()
         coords_list = self.get_all_coordinates()
 
-        list_of_fields = []
+        fields = []
         for i in range(0, 16):
-            tmp_x = coords_list[i][0]
-            tmp_y = coords_list[i][1]
+            tmp_x, tmp_y = coords_list[i]
             tmp_val = tmp_state[i]
 
-            list_of_fields.append(Field(tmp_x, tmp_y, tmp_val))
+            fields.append(Field(tmp_x, tmp_y, tmp_val))
 
-        return list_of_fields
+        return fields
 
     '''
         This function will return pair:
@@ -137,8 +133,8 @@ class Puzzle:
         tmp_color = self.get_current_color()
 
         for i in range(16):
-            tmp_img_name = str(self._fields[i].vrednost) + "_" + tmp_color + \
-                        ".png"
+            color_name = "_" + tmp_color
+            tmp_img_name = str(self._fields[i].vrednost) + color_name + ".png"
 
             ret_list.append((self._fields[i], tmp_img_name))
 
@@ -159,19 +155,19 @@ class Puzzle:
                         break
                 break
 
-        return (index2, new_val1, index1, new_val2)
+        return index2, new_val1, index1, new_val2
 
     '''
         Function only changes values of two fields.
     '''
     def states_change(self):
 
-        if(self.is_last_state()):
+        if self.is_last_state():
             return None
         else:
-            (index1, new_val1, index2, new_val2) = \
-                self.states_difference(
-                    self.current_puzzle_state(), self.next_puzzle_state())
+            index1, new_val1, index2, new_val2 = self.states_difference(
+                self.current_puzzle_state(),
+                self.next_puzzle_state())
 
             self._current_state_index += 1
             self._fields[index1].change_value(new_val1)

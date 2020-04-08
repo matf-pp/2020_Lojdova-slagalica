@@ -1,10 +1,13 @@
 import heapq
-import copy
+import sys
+import os
 
 import numpy as np
 
-from src.BaseSolver import BaseSolver
-from utils.utils import reconstruct_path, serialize, is_solvable, h
+sys.path.extend([os.path.join(os.getcwd(), "src"),
+                 os.path.join(os.getcwd(), "utils")])
+from BaseSolver import BaseSolver
+from utils import reconstruct_path, serialize, is_solvable, h
 
 
 class Astar(BaseSolver):

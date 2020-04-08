@@ -1,9 +1,12 @@
 import argparse
 import time
+import sys
+import os
 
 import numpy as np
 
-from utils.utils import is_solvable
+sys.path.extend([os.path.join(os.getcwd(), "utils")])
+from utils import is_solvable
 
 """Generator of unit-tests. It's reproducible in case seed is known. All tests
 and seed are dumped in the `txt` file."""
