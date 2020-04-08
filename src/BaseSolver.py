@@ -1,3 +1,4 @@
+from utils import serialize, deserialize
 import random
 import sys
 import os
@@ -5,7 +6,6 @@ import os
 import numpy as np
 
 sys.path.extend([os.path.join(os.getcwd(), "utils")])
-from utils import serialize, deserialize
 
 
 class BaseSolver:
