@@ -15,7 +15,7 @@ PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
 BACKGROUND_COLOR = (255, 255, 255)
-SLEEP_DURATION = 0.001
+SLEEP_DURATION = 0.0001
 PUZZLE_X, PUZZLE_Y = 30, 0
 PUZZLE_SIZE = 400
 PUZZLE_DIMENSION = 4
@@ -25,6 +25,12 @@ class Direction:
     r"""Enum class for all possible directions of field movement."""
 
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
+
+
+class ValidAlgorithms:
+    r"""Enum class for all algorithms that can solve puzzle."""
+
+    ASTAR, IDASTAR, WASTAR_D, WASTAR_S = 1, 2, 3, 4
 
 
 def define_move_direction(index1, index2, value1, value2):
@@ -37,7 +43,7 @@ def define_move_direction(index1, index2, value1, value2):
         return Direction.RIGHT if if_cond else Direction.LEFT
 
 
-def get_zero_and_exchange_field(index1, index2, value1):
+def get_zero_and_exchange_field(index1, index2, value1, current_state):
     exchange, zero = None, None
 
     if value1 == 0:
@@ -52,7 +58,6 @@ def get_zero_and_exchange_field(index1, index2, value1):
 
 def move_field(current_state, zero_field, exchange_field, target,
                move_direction):
-
     width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
@@ -99,7 +104,7 @@ def move_field(current_state, zero_field, exchange_field, target,
 
                 fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
     else:
-        while zero_field_variable > target:
+        while zero_field_variable < target:
             pygame.display.update()
             time.sleep(SLEEP_DURATION)
             for field in current_state:
@@ -168,6 +173,81 @@ def draw_puzzle_without_animation_fields(current_state, exchange_field):
         fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
+def init_puzzle(algorithm):
+    if algorithm == ValidAlgorithms.WASTAR_D:
+        for state in starting_states:
+            solver = WAstar(len(state), 4, mode="dynamic")
+            states_list = solver.solve(state)[1][1]
+            # print(solver.solve(state))
+    elif algorithm == ValidAlgorithms.WASTAR_S:
+        for state in starting_states:
+            solver = WAstar(len(state), 4, mode="static")
+            states_list = solver.solve(state)[1][1]
+            # print(solver.solve(state))
+    elif algorithm == ValidAlgorithms.IDASTAR:
+        for state in starting_states:
+            solver = IDAstar(len(state))
+            states_list = solver.solve(state)[1][1]
+            # print(solver.solve(state))
+    elif algorithm == ValidAlgorithms.ASTAR:
+        for state in starting_states:
+            solver = Astar(len(state))
+            states_list = solver.solve(state)[1][1]
+            # print(solver.solve(state))
+    else:
+        raise ValueError("Invalid algoritham")  # should never happen
+
+    puzzle = Puzzle(states_list,
+                    PUZZLE_X, PUZZLE_Y,
+                    "plava",
+                    PUZZLE_SIZE, PUZZLE_DIMENSION)
+
+    return puzzle
+
+
+def solve_puzzle(puzzle):
+
+    current_state = puzzle._fields
+
+    # draw state without animation
+    draw_puzzle(current_state)
+
+    # get difference between current and next state
+    index1, value1, index2, value2 = puzzle.states_difference(
+        puzzle.current_puzzle_state(),
+        puzzle.next_puzzle_state())
+
+    # define direction of field movement
+    move_direction = define_move_direction(index1, index2, value1, value2)
+
+    # get fields for animation
+    exchange_field, zero_field = \
+        get_zero_and_exchange_field(index1, index2, value1, current_state)
+
+    # define stop targets for animation
+    target_x, target_y = exchange_field._x, exchange_field._y
+
+    # move zero field to seted direction
+    if move_direction == Direction.UP:
+        move_field(current_state, zero_field, exchange_field,
+                   target_y, Direction.UP)
+    elif move_direction == Direction.DOWN:
+        move_field(current_state, zero_field, exchange_field,
+                   target_y, Direction.DOWN)
+    elif move_direction == Direction.RIGHT:
+        move_field(current_state, zero_field, exchange_field,
+                   target_x, Direction.RIGHT)
+    elif move_direction == Direction.LEFT:
+        move_field(current_state, zero_field, exchange_field,
+                   target_x, Direction.LEFT)
+    else:
+        raise ValueError("Invalid move_direction")  # should never happen
+
+    if puzzle.states_change() is None:
+        print("Debug")
+    current_state = puzzle._fields
+
+
 if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -177,60 +257,16 @@ if __name__ == "__main__":
         [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
     ]
 
-    for state in starting_states:
-        solver = WAstar(len(state), 4, mode="dynamic")
-        states_list = solver.solve(state)[1][1]
-        print(solver.solve(state))
-
-    puzzle = Puzzle(states_list,
-                    PUZZLE_X, PUZZLE_Y,
-                    "plava",
-                    PUZZLE_SIZE, PUZZLE_DIMENSION)
+    puzzleWastar = init_puzzle(ValidAlgorithms.WASTAR_S)
 
     loop_active = True
-    current_state = puzzle._fields
     while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
 
-        # draw state without animation
-        draw_puzzle(current_state)
+        solve_puzzle(puzzleWastar)
 
-        # get difference between current and next state
-        index1, value1, index2, value2 = puzzle.states_difference(
-            puzzle.current_puzzle_state(),
-            puzzle.next_puzzle_state())
-
-        # define direction of field movement
-        move_direction = define_move_direction(index1, index2, value1, value2)
-
-        # get fields for animation
-        exchange_field, zero_field = get_zero_and_exchange_field(index1,
-                                                                 index2,
-                                                                 value1)
-
-        # define stop targets for animation
-        target_x, target_y = exchange_field._x, exchange_field._y
-
-        # move zero field to seted direction
-        if move_direction == Direction.UP:
-            move_field(current_state, zero_field, exchange_field,
-                       target_y, Direction.UP)
-        elif move_direction == Direction.DOWN:
-            move_field(current_state, zero_field, exchange_field,
-                       target_y, Direction.DOWN)
-        elif move_direction == Direction.RIGHT:
-            move_field(current_state, zero_field, exchange_field,
-                       target_x, Direction.RIGHT)
-        elif move_direction == Direction.LEFT:
-            move_field(current_state, zero_field, exchange_field,
-                       target_x, Direction.LEFT)
-        else:
-            raise ValueError("Invalid move_direction")  # should never happen
-
-        # redisplay, wait and iterate through list of statets
+        # redisplay and wait for next iteration
         pygame.display.update()
         time.sleep(SLEEP_DURATION)
-        puzzle.states_change()
-        current_state = puzzle._fields
