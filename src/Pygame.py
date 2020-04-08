@@ -213,9 +213,12 @@ def solve_puzzle(puzzle):
     draw_puzzle(current_state)
 
     # get difference between current and next state
-    index1, value1, index2, value2 = puzzle.states_difference(
-        puzzle.current_puzzle_state(),
-        puzzle.next_puzzle_state())
+    if puzzle.next_puzzle_state() is not None:
+        index1, value1, index2, value2 = puzzle.states_difference(
+            puzzle.current_puzzle_state(),
+            puzzle.next_puzzle_state())
+    else:
+        return
 
     # define direction of field movement
     move_direction = define_move_direction(index1, index2, value1, value2)
@@ -243,8 +246,7 @@ def solve_puzzle(puzzle):
     else:
         raise ValueError("Invalid move_direction")  # should never happen
 
-    if puzzle.states_change() is None:
-        print("Debug")
+    puzzle.states_change()
     current_state = puzzle._fields
 
 
