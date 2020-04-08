@@ -17,7 +17,8 @@ PUZZLE_IMAGES_EXT = ".png"
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
 SLEEP_DURATION = 0.0001
 PUZZLE_X, PUZZLE_Y = 30, 0
-PUZZLE_DIMENSION = 400
+PUZZLE_SIZE = 400
+PUZZLE_DIMENSION = 4
 
 # screen.blit("ime slike", x, y)
 # define color values
@@ -229,7 +230,7 @@ if __name__ == "__main__":
     puzzle = Puzzle(states_list,
                     PUZZLE_X, PUZZLE_Y,
                     "plava",
-                    PUZZLE_DIMENSION)
+                    PUZZLE_SIZE, PUZZLE_DIMENSION)
 
     loop_active = True
     current_state = puzzle._fields
