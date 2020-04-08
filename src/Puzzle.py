@@ -8,9 +8,9 @@ class Puzzle:
             (x,y)          - upper left point of puzzle
             color          - color of fields in puzzle
             size           - size of puzzle in pixels"""
+
         self._list_of_states = list_of_states
-        self._x = x
-        self._y = y
+        self._x, self._y = x, y
         self._color = color
         self._size = size
 
@@ -54,15 +54,15 @@ class Puzzle:
 
     def get_all_coordinates(self):
         r"""Count fields coordinates realtive to
-                puzzle coordinates and field size."""
-        coords_list = []
+        puzzle coordinates and field size."""
 
-        a = self.get_field_size()
+        coords_list = []
+        field_size = self.get_field_size()
 
         row, col = 1, 0
         for i in range(16):
-            tmp_x = self._x + col * a
-            tmp_y = self._y + row * a
+            tmp_x = self._x + col * field_size
+            tmp_y = self._y + row * field_size
 
             coords_list.append((tmp_x, tmp_y))
 
@@ -137,6 +137,7 @@ class Puzzle:
 
     def states_change(self):
         r"""Function only changes values of two fields."""
+
         if self.is_last_state():
             return None
         else:

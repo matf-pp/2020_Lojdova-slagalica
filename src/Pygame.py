@@ -3,29 +3,27 @@ import time
 import sys
 import os
 
-sys.path.extend([os.path.join(os.getcwd(), "src")])
-from Astar import *
-from IDAstar import *
-from BaseSolver import *
-from WAstar import *
-from Field import *
-from Puzzle import *
+from Astar import Astar
+from IDAstar import IDAstar
+from BaseSolver import BaseSolver
+from WAstar import WAstar
+from Field import Field
+from Puzzle import Puzzle
 
 
-PUZZLE_IMAGES_PATH = os.path.join(os.getcwd(), "src", "Numbers")
+PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
-SLEEP_DURATION = 0.0001
+SLEEP_DURATION = 0.001
 PUZZLE_X, PUZZLE_Y = 30, 0
 PUZZLE_DIMENSION = 400
+BACKGROUND_COLOR = (255, 255, 255)
 
-# screen.blit("ime slike", x, y)
-# define color values
-white = (255, 255, 255)
 
-# define direction values
-# napraviti recnik
-up, down, left, right = 1, 2, 3, 4
+class Direction:
+    r"""Enum class for all possible directions of field movement."""
+
+    UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
 def define_move_direction(index1, index2, value1, value2):
@@ -33,9 +31,9 @@ def define_move_direction(index1, index2, value1, value2):
     if_cond = if_cond or (value2 == 0 and index2 < index1)
 
     if abs(index1 - index2) == 4:
-        return down if if_cond else up
+        return Direction.DOWN if if_cond else Direction.UP
     else:
-        return right if if_cond else left
+        return Direction.RIGHT if if_cond else Direction.LEFT
 
 
 def get_zero_and_exchange_field(index1, index2, value1):
@@ -66,7 +64,7 @@ def move_up(current_state, zero_field, exchange_field, target_y):
                 zero_field._y -= 2
             elif value == exchange_field._value:
                 exchange_field._y += 2
-                screen.fill(white)
+                screen.fill(BACKGROUND_COLOR)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
@@ -95,7 +93,7 @@ def move_down(current_state, zero_field, exchange_field, target_y):
 
             if value == 0:
                 zero_field._y += 2
-                screen.fill(white)
+                screen.fill(BACKGROUND_COLOR)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
             elif value == exchange_field._value:
@@ -126,7 +124,7 @@ def move_right(current_state, zero_field, exchange_field, target_x):
 
             if value == 0:
                 zero_field._x += 2
-                screen.fill(white)
+                screen.fill(BACKGROUND_COLOR)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
             elif value == exchange_field._value:
@@ -158,7 +156,7 @@ def move_left(current_state, zero_field, exchange_field, target_x):
                 zero_field._x -= 2
             elif value == exchange_field._value:
                 exchange_field._x += 2
-                screen.fill(white)
+                screen.fill(BACKGROUND_COLOR)
                 draw_puzzle_without_animation_fields(current_state,
                                                      exchange_field)
                 img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
@@ -258,13 +256,13 @@ if __name__ == "__main__":
         target_x, target_y = exchange_field._x, exchange_field._y
 
         # move zero field to seted direction
-        if move_direction == up:
+        if move_direction == Direction.UP:
             move_up(current_state, zero_field, exchange_field, target_y)
-        elif move_direction == down:
+        elif move_direction == Direction.DOWN:
             move_down(current_state, zero_field, exchange_field, target_y)
-        elif move_direction == right:
+        elif move_direction == Direction.RIGHT:
             move_right(current_state, zero_field, exchange_field, target_x)
-        elif move_direction == left:
+        elif move_direction == Direction.LEFT:
             move_left(current_state, zero_field, exchange_field, target_x)
         else:
             raise ValueError("Invalid move_direction")  # should never happen
