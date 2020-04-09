@@ -15,7 +15,8 @@ PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
 BACKGROUND_COLOR = (255, 255, 255)
-SLEEP_DURATION = 0.0001
+ANIMATION_FIELD_SPEED = 10  # not every value will properly work
+ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
 PUZZLE_SIZE = 400
 PUZZLE_DIMENSION = 4
@@ -63,32 +64,31 @@ def move_field(current_state, zero_field, exchange_field, target,
 
     if move_direction == Direction.UP:
         zero_field_variable = zero_field._y
-        sign = -1
+        sign = -ANIMATION_FIELD_SPEED
     elif move_direction == Direction.DOWN:
         zero_field_variable = zero_field._y
-        sign = 1
+        sign = ANIMATION_FIELD_SPEED
     elif move_direction == Direction.LEFT:
         zero_field_variable = zero_field._x
-        sign = -1
+        sign = -ANIMATION_FIELD_SPEED
     else:
         zero_field_variable = zero_field._x
-        sign = 1
+        sign = ANIMATION_FIELD_SPEED
 
     if move_direction in [Direction.UP, Direction.LEFT]:
         while zero_field_variable > target:
             pygame.display.update()
-            time.sleep(SLEEP_DURATION)
             for field in current_state:
                 value = field._value
                 field_x, field_y = field._x, field._y
 
                 if value == 0:
-                    zero_field_variable += sign * 2
+                    zero_field_variable += sign
                 elif value == exchange_field._value:
                     if move_direction in [Direction.UP, Direction.DOWN]:
-                        exchange_field._y += (-sign) * 2
+                        exchange_field._y += (-sign)
                     else:
-                        exchange_field._x += (-sign) * 2
+                        exchange_field._x += (-sign)
                     screen.fill(BACKGROUND_COLOR)
                     draw_puzzle_without_animation_fields(current_state,
                                                          exchange_field)
@@ -106,18 +106,17 @@ def move_field(current_state, zero_field, exchange_field, target,
     else:
         while zero_field_variable < target:
             pygame.display.update()
-            time.sleep(SLEEP_DURATION)
             for field in current_state:
                 value = field._value
                 field_x, field_y = field._x, field._y
 
                 if value == 0:
-                    zero_field_variable += sign * 2
+                    zero_field_variable += sign
                 elif value == exchange_field._value:
                     if move_direction in [Direction.UP, Direction.DOWN]:
-                        exchange_field._y += (-sign) * 2
+                        exchange_field._y += (-sign)
                     else:
-                        exchange_field._x += (-sign) * 2
+                        exchange_field._x += (-sign)
                     screen.fill(BACKGROUND_COLOR)
                     draw_puzzle_without_animation_fields(current_state,
                                                          exchange_field)
@@ -270,4 +269,4 @@ if __name__ == "__main__":
 
         # redisplay and wait for next iteration
         pygame.display.update()
-        time.sleep(SLEEP_DURATION)
+        time.sleep(ANIMATION_STATE_DURATION)
