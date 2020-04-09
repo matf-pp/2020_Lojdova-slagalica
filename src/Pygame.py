@@ -206,7 +206,6 @@ def init_puzzle(algorithm):
 
 
 def solve_puzzle(puzzle):
-
     current_state = puzzle._fields
 
     # draw state without animation

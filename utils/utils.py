@@ -4,6 +4,14 @@ from permutation import Permutation
 
 
 def reconstruct_path(parent, state):
+    r"""Reconstructs the shortest path in the search tree. It's assumed that
+    starting node have `None` as a parent.
+
+    Arguments:
+        parent (dict): Dictionary of parents for each node.
+        state (str): Hash of the terminating state.
+    """
+
     path = [state]
 
     while parent[state] is not None:

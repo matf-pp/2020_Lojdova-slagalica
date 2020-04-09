@@ -4,10 +4,12 @@ from Field import Field
 class Puzzle:
 
     def __init__(self, list_of_states, x, y, color, size, dimension):
-        r"""list_of_states - list of all puzzle states
-            (x,y)          - upper left point of puzzle
-            color          - color of fields in puzzle
-            size           - size of puzzle in pixels"""
+        r"""
+        Arguments:
+            list_of_states (list): List of all puzzle states.
+            x, y (int): Upper left point of puzzle.
+            color (int): Color of fields in puzzle
+            size (int): Size of puzzle in pixels."""
 
         self._list_of_states = list_of_states
         self._x, self._y = x, y
@@ -55,8 +57,8 @@ class Puzzle:
         return round(self._size / self._dimension, 2)
 
     def get_all_coordinates(self):
-        r"""Count fields coordinates realtive to
-        puzzle coordinates and field size."""
+        r"""Count fields coordinates realtive to puzzle coordinates and field
+        size."""
 
         coords_list = []
         field_size = self.get_field_size()
@@ -77,8 +79,7 @@ class Puzzle:
         return coords_list
 
     def initialize_fields(self):
-        r"""
-        Schedule of fields in puzzle:
+        r"""Schedule of fields in puzzle:
 
         [0]  [1]  [2]  [3]          [0]  [1]  [2]       [0]  [1]
         [4]  [5]  [6]  [7]          [3]  [4]  [5]       [2]  [3]
@@ -105,7 +106,6 @@ class Puzzle:
     def current_puzzle_look(self):
         r"""This function will return pair:
             (Field,img_name_for_that_field)
-
             img_name = Field.value + "_" + self.color + '.png' """
 
         ret_list = []
@@ -122,11 +122,11 @@ class Puzzle:
     def states_difference(self, current_st, next_st):
         for i in range(self._n):
             if current_st[i] != next_st[i]:
-                # First changed field
+                # first changed field
                 index1 = i
                 new_val1 = next_st[i]
 
-                # Second changed field
+                # second changed field
                 for j in range(i + 1, self._n):
                     if current_st[j] != next_st[j]:
                         index2 = j
