@@ -64,7 +64,7 @@ class Puzzle:
         field_size = self.get_field_size()
 
         row, col = 1, 0
-        for i in range(16):
+        for i in range(self._n):
             tmp_x = self._x + col * field_size
             tmp_y = self._y + row * field_size
 
