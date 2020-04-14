@@ -20,7 +20,7 @@ PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
 BACKGROUND_COLOR = (255, 255, 255)
-ANIMATION_FIELD_SPEED = 10  # not every value will properly work
+ANIMATION_FIELD_SPEED = 5  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
 PUZZLE_SIZE = 400
@@ -282,6 +282,7 @@ def solve_puzzle(puzzle):
 
 if __name__ == "__main__":
     state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
     # starting_states = [
     #     # [[7, 1, 2], [0, 8, 3], [6, 4, 5]],
     #     [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
@@ -290,7 +291,7 @@ if __name__ == "__main__":
     results_queue = Queue()
     threads_data = [
         (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
-        # (WAstar(len(state), 4, mode="static"), state, PUZZLE_DIMENSION + 400, 0)
+        (WAstar(len(state), 4, mode="static"), state, PUZZLE_DIMENSION + 400, 0)
         # (Astar(len(state)), state, PUZZLE_DIMENSION + 400, 0)
     ]
 
@@ -303,21 +304,19 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     screen.fill(BACKGROUND_COLOR)
 
-    cnt_completed, loop_active = 0, True
-    while loop_active and cnt_completed != len(threads_data):
+    loop_active = True
+    while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
 
         cur_qsize = results_queue.qsize()
         while cur_qsize > 0:
+            cur_qsize -= 1
             cur_puzzle = results_queue.get()
             flag = solve_puzzle(cur_puzzle)
-            if not flag:
-                cnt_completed += 1
-            else:
+            if flag:
                 results_queue.put(cur_puzzle)
 
         # redisplay and wait for next iteration
         pygame.display.update()
-        time.sleep(ANIMATION_STATE_DURATION)
