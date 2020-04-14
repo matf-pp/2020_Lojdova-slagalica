@@ -1,7 +1,10 @@
+import threading
 import pygame
 import time
 import sys
 import os
+
+from queue import Queue
 
 from Astar import Astar
 from IDAstar import IDAstar
@@ -11,15 +14,37 @@ from Field import Field
 from Puzzle import Puzzle
 
 
+FIELD_SIZE = 100
+
 PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
-WINDOW_WIDTH, WINDOW_HEIGHT = 800, 640
+WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
 BACKGROUND_COLOR = (255, 255, 255)
 ANIMATION_FIELD_SPEED = 10  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
 PUZZLE_SIZE = 400
 PUZZLE_DIMENSION = 4
+
+
+class ThreadSolver(threading.Thread):
+    def __init__(self, solver, queue, args=None):
+        super().__init__(args=args)
+        self.daemon = True
+
+        self._solver = solver
+        self._queue = queue
+
+    def run(self):
+        state, offset_x, offset_y = args
+
+        result = self._solver.solve(state)
+        puzzle = Puzzle(result[1][1],
+                        PUZZLE_X + offset_x, PUZZLE_Y + offset_y,
+                        "plava",
+                        PUZZLE_SIZE,
+                        PUZZLE_DIMENSION)
+        self._queue.put(puzzle)
 
 
 class Direction:
@@ -85,15 +110,18 @@ def move_field(current_state, zero_field, exchange_field, target,
                 if value == 0:
                     zero_field_variable += sign
                 elif value == exchange_field._value:
-                    if move_direction in [Direction.UP, Direction.DOWN]:
+                    if move_direction in [Direction.UP]:
                         exchange_field._y += (-sign)
                     else:
                         exchange_field._x += (-sign)
-                    screen.fill(BACKGROUND_COLOR)
-                    draw_puzzle_without_animation_fields(current_state,
-                                                         exchange_field)
                     img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
+
+                    pygame.draw.rect(screen,
+                                     BACKGROUND_COLOR,
+                                     (width + field_x, height + field_y,
+                                      FIELD_SIZE, FIELD_SIZE))
+
                     screen.blit(img, (width + exchange_field._x,
                                       height + exchange_field._y))
                 else:
@@ -110,16 +138,18 @@ def move_field(current_state, zero_field, exchange_field, target,
                 value = field._value
                 field_x, field_y = field._x, field._y
 
+                pygame.draw.rect(screen,
+                                 BACKGROUND_COLOR,
+                                 (width + field_x, height + field_y,
+                                  FIELD_SIZE, FIELD_SIZE))
+
                 if value == 0:
                     zero_field_variable += sign
                 elif value == exchange_field._value:
-                    if move_direction in [Direction.UP, Direction.DOWN]:
+                    if move_direction in [Direction.DOWN]:
                         exchange_field._y += (-sign)
                     else:
                         exchange_field._x += (-sign)
-                    screen.fill(BACKGROUND_COLOR)
-                    draw_puzzle_without_animation_fields(current_state,
-                                                         exchange_field)
                     img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
                     screen.blit(img, (width + exchange_field._x,
@@ -216,7 +246,7 @@ def solve_puzzle(puzzle):
             puzzle.current_puzzle_state(),
             puzzle.next_puzzle_state())
     else:
-        return
+        return False  # no further moves
 
     # define direction of field movement
     move_direction = define_move_direction(index1, index2, value1, value2)
@@ -247,25 +277,46 @@ def solve_puzzle(puzzle):
     puzzle.states_change()
     current_state = puzzle._fields
 
+    return True  # valid move has happened
+
 
 if __name__ == "__main__":
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    # starting_states = [
+    #     # [[7, 1, 2], [0, 8, 3], [6, 4, 5]],
+    #     [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
+    # ]
 
-    starting_states = [
-        # [[7, 1, 2], [0, 8, 3], [6, 4, 5]],
-        [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
+    results_queue = Queue()
+    threads_data = [
+        (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
+        # (WAstar(len(state), 4, mode="static"), state, PUZZLE_DIMENSION + 400, 0)
+        # (Astar(len(state)), state, PUZZLE_DIMENSION + 400, 0)
     ]
 
-    puzzleWastar = init_puzzle(ValidAlgorithms.WASTAR_S)
+    for solver, state, offset_x, offset_y in threads_data:
+        args = (state, offset_x, offset_y)
+        cur_thread = ThreadSolver(solver, results_queue, args=args)
+        cur_thread.start()
 
-    loop_active = True
-    while loop_active:
+    pygame.init()
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen.fill(BACKGROUND_COLOR)
+
+    cnt_completed, loop_active = 0, True
+    while loop_active and cnt_completed != len(threads_data):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
 
-        solve_puzzle(puzzleWastar)
+        cur_qsize = results_queue.qsize()
+        while cur_qsize > 0:
+            cur_puzzle = results_queue.get()
+            flag = solve_puzzle(cur_puzzle)
+            if not flag:
+                cnt_completed += 1
+            else:
+                results_queue.put(cur_puzzle)
 
         # redisplay and wait for next iteration
         pygame.display.update()
