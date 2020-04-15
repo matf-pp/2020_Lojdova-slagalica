@@ -3,8 +3,6 @@ from Field import Field
 
 class Puzzle:
 
-    #                                                400      4
-    # def __init__(self, list_of_states, x, y, color, size, dimension): -> staro
     def __init__(self, list_of_states, x, y, color, size):
         r"""
         Arguments:
@@ -12,10 +10,6 @@ class Puzzle:
             x, y (int): Upper left point of puzzle.
             color (int): Color of fields in puzzle
             size (int): Size of puzzle in pixels."""
-            
-        #_dimension = 400
-        #_n = 16  
-        #_size = 4
 
         self._list_of_states = list_of_states
         self._x, self._y = x, y
@@ -25,7 +19,7 @@ class Puzzle:
         self._field_size = 100  # Agreement by group
         # Edge of puzzle in pixels
         self._dimension = self._field_size * self._size
-        
+
         self._current_state_index = 0
         self._number_of_states = len(list_of_states)
         self._fields = self.initialize_fields()
@@ -62,6 +56,9 @@ class Puzzle:
 
     def get_field_size(self):
         return self._field_size
+
+    def get_puzzle_coordinates(self):
+        return (self._x, self._y)
 
     def get_all_coordinates(self):
         r"""Count fields coordinates realtive to puzzle coordinates and field

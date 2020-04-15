@@ -26,7 +26,6 @@ LEFT_OFFSET = 100
 BOTTOM_OFFSET = 250   # This is bigger beceuse we plan text under the puzzle
 ANIMATION_FIELD_SPEED = 5  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
-PUZZLE_X, PUZZLE_Y = 30, 0
 
 
 class ProcessSolver(multiprocessing.Process):
@@ -40,10 +39,11 @@ class ProcessSolver(multiprocessing.Process):
     def run(self):
         state, offset_x, offset_y = self._args
 
+        puzzle_x, puzzle_y = 0, 0
         if self._process_idx == 0:
             puzzle_x = RIGHT_OFFSET
         elif self._process_idx == 1:
-            puzzle_x = RIGHT_OFFSET + len(state) * FIELD_SIZE + DISTANCE
+            puzzle_x = RIGHT_OFFSET + FIELD_SIZE * 2 + DISTANCE / 2
 
         puzzle_y = TOP_OFFSET  # Both puzzles have the same y-coordinate
         result = self._solver.solve(state)
@@ -90,8 +90,8 @@ def get_zero_and_exchange_field(index1, index2, value1, current_state):
 
 
 def move_field(current_state, zero_field, exchange_field, target,
-               move_direction):
-    width, height = PUZZLE_X, PUZZLE_Y
+               move_direction, puzzle_x, puzzle_y):
+    width, height = puzzle_x, puzzle_y
     fields_in_row = 1
 
     if move_direction == Direction.UP:
@@ -170,8 +170,8 @@ def move_field(current_state, zero_field, exchange_field, target,
                 fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
-def draw_puzzle(current_state):
-    width, height = PUZZLE_X, PUZZLE_Y
+def draw_puzzle(current_state, puzzle_x, puzzle_y):
+    width, height = puzzle_x, puzzle_y
     fields_in_row = 1
 
     for field in current_state:
@@ -188,7 +188,7 @@ def draw_puzzle(current_state):
         fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
 
 
-def draw_puzzle_without_animation_fields(current_state, exchange_field):
+def draw_puzzle_without_animation_fields(current_state, exchange_field):  # We do not use this function
     width, height = PUZZLE_X, PUZZLE_Y
     fields_in_row = 1
 
@@ -241,11 +241,11 @@ def init_puzzle(algorithm):
     return puzzle
 
 
-def solve_puzzle(puzzle):
+def solve_puzzle(puzzle, puzzle_x, puzzle_y):
     current_state = puzzle._fields
 
     # draw state without animation
-    draw_puzzle(current_state)
+    draw_puzzle(current_state, puzzle_x, puzzle_y)
 
     # get difference between current and next state
     if puzzle.next_puzzle_state() is not None:
@@ -268,16 +268,16 @@ def solve_puzzle(puzzle):
     # move zero field to seted direction
     if move_direction == Direction.UP:
         move_field(current_state, zero_field, exchange_field,
-                   target_y, Direction.UP)
+                   target_y, Direction.UP, puzzle_x, puzzle_y)
     elif move_direction == Direction.DOWN:
         move_field(current_state, zero_field, exchange_field,
-                   target_y, Direction.DOWN)
+                   target_y, Direction.DOWN, puzzle_x, puzzle_y)
     elif move_direction == Direction.RIGHT:
         move_field(current_state, zero_field, exchange_field,
-                   target_x, Direction.RIGHT)
+                   target_x, Direction.RIGHT, puzzle_x, puzzle_y)
     elif move_direction == Direction.LEFT:
         move_field(current_state, zero_field, exchange_field,
-                   target_x, Direction.LEFT)
+                   target_x, Direction.LEFT, puzzle_x, puzzle_y)
     else:
         raise ValueError("Invalid move_direction")  # should never happen
 
@@ -298,13 +298,13 @@ if __name__ == "__main__":
     # We hardcode this dimensions because we have a deal
     # that window looks like this
     if len(state) == 4:
-        window_width = RIGHT_OFFSET + 8 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_width = RIGHT_OFFSET + 8 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
         window_height = TOP_OFFSET + 4 * FIELD_SIZE + BOTTOM_OFFSET
     elif len(state) == 3:
-        window_width = RIGHT_OFFSET + 6 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_width = RIGHT_OFFSET + 6 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
         window_height = TOP_OFFSET + 3 * FIELD_SIZE + BOTTOM_OFFSET
     elif len(state) == 2:
-        window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
         window_height = TOP_OFFSET + 2 * FIELD_SIZE + BOTTOM_OFFSET
 
     # results_queue = Queue()
@@ -336,8 +336,8 @@ if __name__ == "__main__":
 
     textRect1 = text1.get_rect()
     textRect2 = text2.get_rect()
-    textRect1.center = (RIGHT_OFFSET * 5, 50)
-    textRect2.center = (RIGHT_OFFSET * 5 + DISTANCE * 5, 50)
+    textRect1.center = (RIGHT_OFFSET * 5 + 50, 50)
+    textRect2.center = (RIGHT_OFFSET * 5 + DISTANCE * 5 + 40, 50)
 
     loop_active = True
     while loop_active:
@@ -352,7 +352,8 @@ if __name__ == "__main__":
         while cur_qsize > 0:
             cur_qsize -= 1
             cur_puzzle = results_queue.get()
-            flag = solve_puzzle(cur_puzzle)
+            (cur_puzzle_x, cur_puzzle_y) = cur_puzzle.get_puzzle_coordinates()
+            flag = solve_puzzle(cur_puzzle, cur_puzzle_x, cur_puzzle_y)  # TODO
             if flag:
                 results_queue.put(cur_puzzle)
 
