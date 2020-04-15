@@ -243,17 +243,31 @@ def init_scene(scene_width, scene_height):
                                    TOP_OFFSET + (len(state)) * FIELD_SIZE + FONT_SIZE // 2)
     screen.blit(text_upper_right, textrect_upper_right)
 
+    text_lower_left = font.render("A*", True, FONT_COLOR,
+                                  BACKGROUND_COLOR)
+    textrect_lower_left = text_lower_left.get_rect()
+    textrect_lower_left.center = (LEFT_OFFSET + len(state) * FIELD_SIZE // 2,
+                                  scene_height - BOTTOM_OFFSET - FONT_SIZE // 2)
+    screen.blit(text_lower_left, textrect_lower_left)
+
+    text_lower_right = font.render("IDA*", True, FONT_COLOR,
+                                   BACKGROUND_COLOR)
+    textrect_lower_right = text_lower_right.get_rect()
+    textrect_lower_right.center = (scene_width - RIGHT_OFFSET - len(state) * FIELD_SIZE // 2,
+                                   scene_height - BOTTOM_OFFSET - FONT_SIZE // 2)
+    screen.blit(text_lower_right, textrect_lower_right)
+
     return screen
 
 
 if __name__ == "__main__":
     # hardcoded starting states
-    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
-    scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + FONT_SIZE
+    scene_height = VERTICAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST + 2 * FONT_SIZE
 
     screen = init_scene(scene_width, scene_height)
 
@@ -264,7 +278,13 @@ if __name__ == "__main__":
          LEFT_OFFSET, TOP_OFFSET),
         (WAstar(len(state), 4, mode="static"),
          state,
-         LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
+         LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET),
+        (Astar(len(state)),
+         state,
+         LEFT_OFFSET, TOP_OFFSET + FONT_SIZE + PUZZLE_DIST + len(state) * FIELD_SIZE),
+        (IDAstar(len(state)),
+         state,
+         LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET + FONT_SIZE + PUZZLE_DIST + len(state) * FIELD_SIZE)
     ]
 
     # running daemon processes for each algorithm
