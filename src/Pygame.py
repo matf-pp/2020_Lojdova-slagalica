@@ -11,45 +11,40 @@ from WAstar import WAstar
 from Field import Field
 from Puzzle import Puzzle
 
+# font related
+FONT_COLOR = (128, 128, 128)
+FONT_SIZE = 24
 
-FIELD_SIZE = 100
+# scene related
+TOP_OFFSET = 0
+RIGHT_OFFSET = 0
+BOTTOM_OFFSET = 0
+LEFT_OFFSET = 0
+VERTICAL_OFFSET = TOP_OFFSET + BOTTOM_OFFSET
+HORIZONTAL_OFFSET = LEFT_OFFSET + RIGHT_OFFSET
+ANIMATION_FIELD_SPEED = 5
+BACKGROUND_COLOR = (255, 255, 255)
 
+# puzzle related
 PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
-BACKGROUND_COLOR = (255, 255, 255)
-green = (0, 255, 0)
-blue = (0, 0, 128)
-DISTANCE = 100        # Distance between two puzzles
-TOP_OFFSET = 0
-RIGHT_OFFSET = 50
-LEFT_OFFSET = 100
-BOTTOM_OFFSET = 250   # This is bigger beceuse we plan text under the puzzle
-ANIMATION_FIELD_SPEED = 5  # not every value will properly work
-ANIMATION_STATE_DURATION = 0.25
+PUZZLE_DIST = 25
+FIELD_SIZE = 100
 
 
 class ProcessSolver(multiprocessing.Process):
-    def __init__(self, solver, queue, process_idx, args=None):
+    def __init__(self, solver, queue, args=None):
         super().__init__(daemon=True, args=args)
 
         self._solver = solver
         self._queue = queue
-        self._process_idx = process_idx
 
     def run(self):
-        state, offset_x, offset_y = self._args
+        state, puzzle_x, puzzle_y = self._args
 
-        puzzle_x, puzzle_y = 0, 0
-        if self._process_idx == 0:
-            puzzle_x = RIGHT_OFFSET
-        elif self._process_idx == 1:
-            puzzle_x = RIGHT_OFFSET + FIELD_SIZE * 2 + DISTANCE / 2
-
-        puzzle_y = TOP_OFFSET  # Both puzzles have the same y-coordinate
         result = self._solver.solve(state)
         puzzle = Puzzle(result[1][1],
                         puzzle_x, puzzle_y,
-                        "plava",
                         len(state))
         self._queue.put(puzzle)
 
@@ -58,12 +53,6 @@ class Direction:
     r"""Enum class for all possible directions of field movement."""
 
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
-
-
-class ValidAlgorithms:
-    r"""Enum class for all algorithms that can solve puzzle."""
-
-    ASTAR, IDASTAR, WASTAR_D, WASTAR_S = 1, 2, 3, 4
 
 
 def define_move_direction(index1, index2, value1, value2):
@@ -91,9 +80,6 @@ def get_zero_and_exchange_field(index1, index2, value1, current_state):
 
 def move_field(current_state, zero_field, exchange_field, target,
                move_direction, puzzle_x, puzzle_y):
-    width, height = puzzle_x, puzzle_y
-    fields_in_row = 1
-
     if move_direction == Direction.UP:
         zero_field_variable = zero_field._y
         sign = -ANIMATION_FIELD_SPEED
@@ -126,18 +112,14 @@ def move_field(current_state, zero_field, exchange_field, target,
 
                     pygame.draw.rect(screen,
                                      BACKGROUND_COLOR,
-                                     (width + field_x, height + field_y,
+                                     (field_x, field_y,
                                       FIELD_SIZE, FIELD_SIZE))
 
-                    screen.blit(img, (width + exchange_field._x,
-                                      height + exchange_field._y))
+                    screen.blit(img, (exchange_field._x, exchange_field._y))
                 else:
                     img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
-                    screen.blit(img, (width + field_x,
-                                      height + field_y))
-
-                fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
+                    screen.blit(img, (field_x, field_y))
     else:
         while zero_field_variable < target:
             pygame.display.update()
@@ -147,7 +129,7 @@ def move_field(current_state, zero_field, exchange_field, target,
 
                 pygame.draw.rect(screen,
                                  BACKGROUND_COLOR,
-                                 (width + field_x, height + field_y,
+                                 (field_x, field_y,
                                   FIELD_SIZE, FIELD_SIZE))
 
                 if value == 0:
@@ -159,21 +141,14 @@ def move_field(current_state, zero_field, exchange_field, target,
                         exchange_field._x += (-sign)
                     img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
-                    screen.blit(img, (width + exchange_field._x,
-                                      height + exchange_field._y))
+                    screen.blit(img, (exchange_field._x, exchange_field._y))
                 else:
                     img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
-                    screen.blit(img, (width + field_x,
-                                      height + field_y))
-
-                fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
+                    screen.blit(img, (field_x, field_y))
 
 
 def draw_puzzle(current_state, puzzle_x, puzzle_y):
-    width, height = puzzle_x, puzzle_y
-    fields_in_row = 1
-
     for field in current_state:
         value = field._value
         field_x, field_y = field._x, field._y
@@ -183,62 +158,7 @@ def draw_puzzle(current_state, puzzle_x, puzzle_y):
 
         img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
                                              str(value) + PUZZLE_IMAGES_EXT))
-        screen.blit(img, (width + field_x, height + field_y))
-
-        fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
-
-
-def draw_puzzle_without_animation_fields(current_state, exchange_field):  # We do not use this function
-    width, height = PUZZLE_X, PUZZLE_Y
-    fields_in_row = 1
-
-    for field in current_state:
-        value = field._value
-        field_x, field_y = field._x, field._y
-
-        if value == 0:
-            continue
-        elif exchange_field._value == value:
-            continue
-        else:
-            img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
-                                    str(value) + PUZZLE_IMAGES_EXT))
-            screen.blit(img, (width + field_x,
-                              height + field_y))
-
-        fields_in_row = 1 if fields_in_row == 4 else fields_in_row + 1
-
-
-def init_puzzle(algorithm):
-    if algorithm == ValidAlgorithms.WASTAR_D:
-        for state in starting_states:
-            solver = WAstar(len(state), 4, mode="dynamic")
-            states_list = solver.solve(state)[1][1]
-            # print(solver.solve(state))
-    elif algorithm == ValidAlgorithms.WASTAR_S:
-        for state in starting_states:
-            solver = WAstar(len(state), 4, mode="static")
-            states_list = solver.solve(state)[1][1]
-            # print(solver.solve(state))
-    elif algorithm == ValidAlgorithms.IDASTAR:
-        for state in starting_states:
-            solver = IDAstar(len(state))
-            states_list = solver.solve(state)[1][1]
-            # print(solver.solve(state))
-    elif algorithm == ValidAlgorithms.ASTAR:
-        for state in starting_states:
-            solver = Astar(len(state))
-            states_list = solver.solve(state)[1][1]
-            # print(solver.solve(state))
-    else:
-        raise ValueError("Invalid algoritham")  # should never happen
-
-    # puzzle = Puzzle(states_list,
-    #               PUZZLE_X, PUZZLE_Y,
-    #                "plava",
-    #                len(state))
-
-    return puzzle
+        screen.blit(img, (field_x, field_y))
 
 
 def solve_puzzle(puzzle, puzzle_x, puzzle_y):
@@ -287,66 +207,78 @@ def solve_puzzle(puzzle, puzzle_x, puzzle_y):
     return True  # valid move has happened
 
 
-if __name__ == "__main__":
-    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
-    # starting_states = [
-    #     # [[7, 1, 2], [0, 8, 3], [6, 4, 5]],
-    #     [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
-    # ]
+def init_scene(scene_width, scene_height):
+    r"""Initializing scene and returning Pygame's `Surface` object. Scene
+    contains:
+        (1) text boxes -- done here
+        (2) proper background color -- done here
+        (3) puzzles -- done separately
 
-    # We hardcode this dimensions because we have a deal
-    # that window looks like this
-    if len(state) == 4:
-        window_width = RIGHT_OFFSET + 8 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
-        window_height = TOP_OFFSET + 4 * FIELD_SIZE + BOTTOM_OFFSET
-    elif len(state) == 3:
-        window_width = RIGHT_OFFSET + 6 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
-        window_height = TOP_OFFSET + 3 * FIELD_SIZE + BOTTOM_OFFSET
-    elif len(state) == 2:
-        window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET + 50
-        window_height = TOP_OFFSET + 2 * FIELD_SIZE + BOTTOM_OFFSET
+    Arguments:
+        scene_width, scene_height (ints): Dimension of scene window in pixels.
 
-    # results_queue = Queue()
-    results_queue = multiprocessing.Queue()
-    processes_data = [
-        (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
-        (WAstar(len(state), 4, mode="static"), state, 400, 0)
-        # (Astar(len(state)), state, 400, 0)
-    ]
-
-    for i, (solver, state, offset_x, offset_y) in enumerate(processes_data):
-        args = (state, offset_x, offset_y)
-        cur_process = ProcessSolver(solver, results_queue, i, args=args)
-        cur_process.start()
+    Returns:
+        screen (Surface): Object for scene manipulation."""
 
     pygame.init()
-    screen = pygame.display.set_mode((window_width, window_height))
-    pygame.display.set_caption('Loyd Puzzle')
+    screen = pygame.display.set_mode((scene_width, scene_height))
+    pygame.display.set_caption("Loyd Puzzle A* Solvers")
 
     icon = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "puzzle.png"))
     pygame.display.set_icon(icon)
-
     screen.fill(BACKGROUND_COLOR)
 
-    # Text
-    font = pygame.font.Font('freesansbold.ttf', 32)
-    text1 = font.render('First', True, green, blue)
-    text2 = font.render('Second', True, green, blue)
+    font = pygame.font.Font("./src/fonts/calibri.ttf", FONT_SIZE)  # test font
+    text_upper_left = font.render("WA* dynamic", True, FONT_COLOR,
+                                  BACKGROUND_COLOR)
+    textrect_upper_left = text_upper_left.get_rect()
+    textrect_upper_left.center = (LEFT_OFFSET + len(state) * FIELD_SIZE // 2,
+                                  TOP_OFFSET + (len(state)) * FIELD_SIZE + FONT_SIZE // 2)
+    screen.blit(text_upper_left, textrect_upper_left)
 
-    textRect1 = text1.get_rect()
-    textRect2 = text2.get_rect()
-    textRect1.center = (RIGHT_OFFSET * 5 + 50, 50)
-    textRect2.center = (RIGHT_OFFSET * 5 + DISTANCE * 5 + 40, 50)
+    text_upper_right = font.render("WA* static", True, FONT_COLOR,
+                                   BACKGROUND_COLOR)
+    textrect_upper_right = text_upper_right.get_rect()
+    textrect_upper_right.center = (scene_width - RIGHT_OFFSET - len(state) * FIELD_SIZE // 2,
+                                   TOP_OFFSET + (len(state)) * FIELD_SIZE + FONT_SIZE // 2)
+    screen.blit(text_upper_right, textrect_upper_right)
+
+    return screen
+
+
+if __name__ == "__main__":
+    # hardcoded starting states
+    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+
+    # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
+    scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
+    scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + FONT_SIZE
+
+    screen = init_scene(scene_width, scene_height)
+
+    # necessary arguments for each process
+    multiprocessing_data = [
+        (WAstar(len(state), 4, mode="dynamic"),
+         state,
+         LEFT_OFFSET, TOP_OFFSET),
+        (WAstar(len(state), 4, mode="static"),
+         state,
+         LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
+    ]
+
+    # running daemon processes for each algorithm
+    results_queue = multiprocessing.Queue()
+    for solver, state, offset_x, offset_y in multiprocessing_data:
+        args = (state, offset_x, offset_y)
+        cur_process = ProcessSolver(solver, results_queue, args=args)
+        cur_process.start()
 
     loop_active = True
     while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
-
-        screen.blit(text1, textRect1)
-        screen.blit(text2, textRect2)
 
         cur_qsize = results_queue.qsize()
         while cur_qsize > 0:

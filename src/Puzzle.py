@@ -3,22 +3,19 @@ from Field import Field
 
 class Puzzle:
 
-    def __init__(self, list_of_states, x, y, color, size):
+    def __init__(self, list_of_states, x, y, size):
         r"""
         Arguments:
             list_of_states (list): List of all puzzle states.
             x, y (int): Upper left point of puzzle.
-            color (int): Color of fields in puzzle
             size (int): Size of puzzle in pixels."""
 
         self._list_of_states = list_of_states
         self._x, self._y = x, y
-        self._color = color
-        self._size = size       # Size of puzzle. Can be 4,3 or 2
-        self._n = size * size   # Number of fields. Can be 16,9 or 4
-        self._field_size = 100  # Agreement by group
-        # Edge of puzzle in pixels
-        self._dimension = self._field_size * self._size
+        self._size = size  # size of puzzle. Can be 4,3 or 2
+        self._n = size * size  # number of fields. Can be 16,9 or 4
+        self._field_size = 100  # agreement by group
+        self._dimension = self._field_size * self._size  # edge of puzzle in pixels
 
         self._current_state_index = 0
         self._number_of_states = len(list_of_states)
@@ -51,11 +48,11 @@ class Puzzle:
         if(self._current_state_index == self._number_of_states - 1):
             return True
 
-    def get_current_color(self):
-        return self._color
-
     def get_field_size(self):
         return self._field_size
+
+    def get_puzzle_size(self):
+        return self._size
 
     def get_puzzle_coordinates(self):
         return (self._x, self._y)
@@ -70,7 +67,7 @@ class Puzzle:
         row, col = 1, 0
         for i in range(self._n):
             tmp_x = self._x + col * field_size
-            tmp_y = self._y + row * field_size
+            tmp_y = self._y + (row - 1) * field_size
 
             coords_list.append((tmp_x, tmp_y))
 
@@ -106,22 +103,6 @@ class Puzzle:
             fields.append(Field(tmp_x, tmp_y, tmp_val))
 
         return fields
-
-    def current_puzzle_look(self):
-        r"""This function will return pair:
-            (Field,img_name_for_that_field)
-            img_name = Field.value + "_" + self.color + '.png' """
-
-        ret_list = []
-        tmp_color = self.get_current_color()
-
-        for i in range(self._n):
-            color_name = "_" + tmp_color
-            tmp_img_name = str(self._fields[i].vrednost) + color_name + ".png"
-
-            ret_list.append((self._fields[i], tmp_img_name))
-
-        return ret_list
 
     def states_difference(self, current_st, next_st):
         for i in range(self._n):
