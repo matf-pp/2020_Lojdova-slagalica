@@ -19,8 +19,12 @@ FIELD_SIZE = 100
 PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 BACKGROUND_COLOR = (255, 255, 255)
-DISTANCE = 200        # Distance between two puzzles
-CLASSIC_OFFSET = 150  # By both side and on top
+green = (0, 255, 0)
+blue = (0, 0, 128)
+DISTANCE = 100        # Distance between two puzzles
+TOP_OFFSET = 0
+RIGHT_OFFSET = 50
+LEFT_OFFSET = 100
 BOTTOM_OFFSET = 250   # This is bigger beceuse we plan text under the puzzle
 ANIMATION_FIELD_SPEED = 5  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
@@ -40,11 +44,11 @@ class ThreadSolver(threading.Thread):
         state, offset_x, offset_y = args
 
         if self.serial_num == 1:
-            puzzle_x = CLASSIC_OFFSET
+            puzzle_x = RIGHT_OFFSET
         elif self.serial_num == 2:
-            puzzle_x = CLASSIC_OFFSET + len(state) * FIELD_SIZE + DISTANCE
+            puzzle_x = RIGHT_OFFSET + len(state) * FIELD_SIZE + DISTANCE
 
-        puzzle_y = CLASSIC_OFFSET  # Both puzzles have the same y-coordinate
+        puzzle_y = TOP_OFFSET  # Both puzzles have the same y-coordinate
         result = self._solver.solve(state)
         puzzle = Puzzle(result[1][1],
                         puzzle_x, puzzle_y,
@@ -297,15 +301,15 @@ if __name__ == "__main__":
     # We hardcode this dimensions because we have a deal
     # that window looks like this
     if len(state) == 4:
-        window_width = 1300
-        window_height = 800
+        window_width = RIGHT_OFFSET + 8 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 4 * FIELD_SIZE + BOTTOM_OFFSET
     elif len(state) == 3:
-        window_width = 1100
-        window_height = 700
+        window_width = RIGHT_OFFSET + 6 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 3 * FIELD_SIZE + BOTTOM_OFFSET
     elif len(state) == 2:
-        window_width = 900
-        window_height = 600
-        
+        window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 2 * FIELD_SIZE + BOTTOM_OFFSET
+
     results_queue = Queue()
     threads_data = [
         (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
@@ -322,13 +326,31 @@ if __name__ == "__main__":
 
     pygame.init()
     screen = pygame.display.set_mode((window_width, window_height))
+    pygame.display.set_caption('Loyd Puzzle')
+
+    icon = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "puzzle.png"))
+    pygame.display.set_icon(icon)
+
     screen.fill(BACKGROUND_COLOR)
+
+    # Text
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text1 = font.render('First', True, green, blue)
+    text2 = font.render('Second', True, green, blue)
+
+    textRect1 = text1.get_rect()
+    textRect2 = text2.get_rect()
+    textRect1.center = (RIGHT_OFFSET * 5, 50)
+    textRect2.center = (RIGHT_OFFSET * 5 + DISTANCE * 5, 50)
 
     loop_active = True
     while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
+
+        screen.blit(text1, textRect1)
+        screen.blit(text2, textRect2)
 
         cur_qsize = results_queue.qsize()
         while cur_qsize > 0:
