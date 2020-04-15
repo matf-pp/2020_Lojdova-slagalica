@@ -18,32 +18,38 @@ FIELD_SIZE = 100
 
 PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
-WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
 BACKGROUND_COLOR = (255, 255, 255)
+DISTANCE = 200        # Distance between two puzzles
+CLASSIC_OFFSET = 150  # By both side and on top
+BOTTOM_OFFSET = 250   # This is bigger beceuse we plan text under the puzzle
 ANIMATION_FIELD_SPEED = 5  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
-PUZZLE_SIZE = 400
-PUZZLE_DIMENSION = 4
 
 
 class ThreadSolver(threading.Thread):
-    def __init__(self, solver, queue, args=None):
+    def __init__(self, solver, queue, ser_num, args=None):
         super().__init__(args=args)
         self.daemon = True
 
         self._solver = solver
         self._queue = queue
+        self.serial_num = ser_num   # First or second puzzle
 
     def run(self):
         state, offset_x, offset_y = args
 
+        if self.serial_num == 1:
+            puzzle_x = CLASSIC_OFFSET
+        elif self.serial_num == 2:
+            puzzle_x = CLASSIC_OFFSET + len(state) * FIELD_SIZE + DISTANCE
+
+        puzzle_y = CLASSIC_OFFSET  # Both puzzles have the same y-coordinate
         result = self._solver.solve(state)
         puzzle = Puzzle(result[1][1],
-                        PUZZLE_X + offset_x, PUZZLE_Y + offset_y,
+                        puzzle_x, puzzle_y,
                         "plava",
-                        PUZZLE_SIZE,
-                        PUZZLE_DIMENSION)
+                        len(state))
         self._queue.put(puzzle)
 
 
@@ -226,10 +232,10 @@ def init_puzzle(algorithm):
     else:
         raise ValueError("Invalid algoritham")  # should never happen
 
-    puzzle = Puzzle(states_list,
-                    PUZZLE_X, PUZZLE_Y,
-                    "plava",
-                    PUZZLE_SIZE, PUZZLE_DIMENSION)
+    # puzzle = Puzzle(states_list,
+    #               PUZZLE_X, PUZZLE_Y,
+    #                "plava",
+    #                len(state))
 
     return puzzle
 
@@ -288,20 +294,34 @@ if __name__ == "__main__":
     #     [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
     # ]
 
+    # We hardcode this dimensions because we have a deal
+    # that window looks like this
+    if len(state) == 4:
+        window_width = 1300
+        window_height = 800
+    elif len(state) == 3:
+        window_width = 1100
+        window_height = 700
+    elif len(state) == 2:
+        window_width = 900
+        window_height = 600
+        
     results_queue = Queue()
     threads_data = [
         (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
-        (WAstar(len(state), 4, mode="static"), state, PUZZLE_DIMENSION + 400, 0)
+        (WAstar(len(state), 4, mode="static"), state, 400, 0)
         # (Astar(len(state)), state, PUZZLE_DIMENSION + 400, 0)
     ]
 
+    i = 1  # Serial number of puzzle
     for solver, state, offset_x, offset_y in threads_data:
         args = (state, offset_x, offset_y)
-        cur_thread = ThreadSolver(solver, results_queue, args=args)
+        cur_thread = ThreadSolver(solver, results_queue, i, args=args)
         cur_thread.start()
+        i += 1
 
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen = pygame.display.set_mode((window_width, window_height))
     screen.fill(BACKGROUND_COLOR)
 
     loop_active = True
