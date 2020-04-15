@@ -22,7 +22,7 @@ BOTTOM_OFFSET = 0
 LEFT_OFFSET = 0
 VERTICAL_OFFSET = TOP_OFFSET + BOTTOM_OFFSET
 HORIZONTAL_OFFSET = LEFT_OFFSET + RIGHT_OFFSET
-ANIMATION_FIELD_SPEED = 5
+ANIMATION_FIELD_SPEED = 2
 BACKGROUND_COLOR = (255, 255, 255)
 
 # puzzle related
@@ -55,17 +55,39 @@ class Direction:
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
-def define_move_direction(puzzle_size, index1, index2, value1, value2):
-    if_cond = value1 == 0 and index1 < index2
-    if_cond = if_cond or (value2 == 0 and index2 < index1)
+def define_move_direction(puzzle_size, index_src, index_dest, value_src, value_dest):
+    r"""Definens in which direction empty field of puzzle should be moved
+    
+    If the difference between source and destinantion fields(in our case
+    empty and exchage fields) is equal to puzzle size then our fields are
+    one above the other. In other case they are side by side.
 
-    if abs(index1 - index2) == puzzle_size:
+    The field with a smaller index is above the other (or on the left side 
+    if they stands side by side)
+
+    With all of these we can define position of the empty field relative
+    to exchange field
+    """
+
+    if_cond = value_src == 0 and index_src < index_dest
+    if_cond = if_cond or (value_dest == 0 and index_dest < index_src)
+
+    if abs(index_src - index_dest) == puzzle_size:
         return Direction.DOWN if if_cond else Direction.UP
     else:
         return Direction.RIGHT if if_cond else Direction.LEFT
 
 
 def get_zero_and_exchange_field(index1, index2, value1, current_state):
+    r"""Function defines which index corresponds to exchange and which
+    corresponds to empty (zero) field
+
+    If the value of first field is zero, then zero field stands in position
+    of the first index in current state and exchange field belongs to other index
+
+    In other case exchange field is at the first and zero field at the second
+    index position 
+    """
     exchange, zero = None, None
 
     if value1 == 0:
@@ -80,6 +102,24 @@ def get_zero_and_exchange_field(index1, index2, value1, current_state):
 
 def move_field(current_state, zero_field, exchange_field, target,
                move_direction, puzzle_x, puzzle_y):
+
+    r"""At first, function determines direction in which empty field
+    is seted to be moved.
+
+    Then, function swaps fields by increasing/decresaing coordinates
+    of either empty and exchange field. If the move direction is up or down
+    only y coordinate should be changed (in other case only x coordinate should
+    be changed for both fields). It is enough to check only one field coordinate
+    (in our case we check empty field coordinate)
+
+    If zero field should move up, its y coordinate should decrease, and the
+    sign variable is set to be negative number. With same logic we define sign
+    variable for other directions
+
+    When we define target coordinate, its value and direction of move,
+    main loop of this function changes both coordinates of empty and exchange
+    field by increasing/decreasing them for the value of sign variable
+    """
     if move_direction == Direction.UP:
         zero_field_variable = zero_field._y
         sign = -ANIMATION_FIELD_SPEED
@@ -149,6 +189,13 @@ def move_field(current_state, zero_field, exchange_field, target,
 
 
 def draw_puzzle(current_state, puzzle_x, puzzle_y):
+    r"""Function iterates through current state of the puzzle
+    and draws all fields as a images
+    
+    In the place of empty(zero) field nothing should be draw so we
+    skip the field with value 0
+    """
+
     for field in current_state:
         value = field._value
         field_x, field_y = field._x, field._y
@@ -162,6 +209,10 @@ def draw_puzzle(current_state, puzzle_x, puzzle_y):
 
 
 def solve_puzzle(puzzle, puzzle_x, puzzle_y):
+    r"""Function gets current state of puzzle, draws puzzle, gets difference
+    between current and the next state of the puzzle, and makes transition
+    from current to the next state"""
+    
     current_state = puzzle._fields
 
     # draw state without animation
