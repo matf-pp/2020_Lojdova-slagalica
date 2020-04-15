@@ -55,11 +55,11 @@ class Direction:
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
-def define_move_direction(index1, index2, value1, value2):
+def define_move_direction(puzzle_size, index1, index2, value1, value2):
     if_cond = value1 == 0 and index1 < index2
     if_cond = if_cond or (value2 == 0 and index2 < index1)
 
-    if abs(index1 - index2) == 4:
+    if abs(index1 - index2) == puzzle_size:
         return Direction.DOWN if if_cond else Direction.UP
     else:
         return Direction.RIGHT if if_cond else Direction.LEFT
@@ -176,7 +176,11 @@ def solve_puzzle(puzzle, puzzle_x, puzzle_y):
         return False  # no further moves
 
     # define direction of field movement
-    move_direction = define_move_direction(index1, index2, value1, value2)
+    move_direction = define_move_direction(puzzle.get_puzzle_size(),
+                                           index1,
+                                           index2,
+                                           value1,
+                                           value2)
 
     # get fields for animation
     exchange_field, zero_field = \
@@ -248,8 +252,8 @@ def init_scene(scene_width, scene_height):
 
 if __name__ == "__main__":
     # hardcoded starting states
-    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
