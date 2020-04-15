@@ -10,10 +10,12 @@ from BaseSolver import BaseSolver
 from WAstar import WAstar
 from Field import Field
 from Puzzle import Puzzle
+from tkinter import *
 
 # font related
 FONT_COLOR = (128, 128, 128)
 FONT_SIZE = 24
+FONT = "Courier"
 
 # scene related
 TOP_OFFSET = 0
@@ -30,7 +32,6 @@ PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
 PUZZLE_DIST = 25
 FIELD_SIZE = 100
-
 
 class ProcessSolver(multiprocessing.Process):
     def __init__(self, solver, queue, args=None):
@@ -301,10 +302,91 @@ def init_scene(scene_width, scene_height):
     return screen
 
 
+def user_menu():
+    r"""function draws basic tkinter window that allows user to select
+    which algorithms dose he wants to compare"""
+
+    # this function creates string that contains names of all algorithms that
+    # user wants to compare
+    def get_algorithms():
+   
+        global algorithms
+
+        # special variables in tkinter library can return their value
+        # only with get method of the varible 
+        if WAstar_dynamic_variable.get():
+            algorithms += "WAstar_dynamic,"
+        if WAstar_static_variable.get():
+            algorithms += "WAstar_static,"
+        if IDAstar_variable.get():
+            algorithms += "IDAstar,"
+        if Astar_variable.get():
+            algorithms += "Astar,"
+
+        algorithms = algorithms[0:len(algorithms)-1]
+
+    # this part creates tkinter window
+    root = Tk()
+    root.geometry('400x300')
+
+    # special tkinter variables that contains informations from checkboxes
+    WAstar_dynamic_variable = BooleanVar()
+    WAstar_static_variable = BooleanVar()
+    IDAstar_variable = BooleanVar()
+    Astar_variable = BooleanVar()
+
+    # create new Checkbutton and its attributes
+    WAstar_dynamic_box = Checkbutton(root, text="WAstar dynamic algorithm",
+                                     variable=WAstar_dynamic_variable,
+                                     onvalue = True,
+                                     offvalue = False)
+    WAstar_dynamic_box.config(font=(FONT, 14))
+    WAstar_dynamic_box.place(relx = 0.01, rely = 0.01)
+
+    WAstar_static_box = Checkbutton(root, text="WAstar static algorithm",
+                                     variable=WAstar_static_variable,
+                                     onvalue = True,
+                                     offvalue = False)
+    WAstar_static_box.config(font=(FONT, 14))
+    WAstar_static_box.place(relx = 0.01, rely = 0.1)
+
+    IDAstar_box = Checkbutton(root, text="IDAstar algorithm",
+                                     variable = IDAstar_variable,
+                                     onvalue = True,
+                                     offvalue = False)
+    IDAstar_box.config(font=(FONT, 14))
+    IDAstar_box.place(relx = 0.01, rely = 0.2)
+
+    Astar_box = Checkbutton(root, text="Astar algorithm",
+                                     variable=Astar_variable,
+                                     onvalue = True,
+                                     offvalue = False)
+    Astar_box.config(font=(FONT, 14))
+    Astar_box.place(relx = 0.01,  rely = 0.3)
+
+    # create new Button and its atributes
+    submit = Button(root, text = "Submit",
+                    command = get_algorithms)
+    submit.config(height = 5, width = 20, background = "red")
+    submit.place(relx = 0.5, rely = 0.5, anchor = CENTER)
+
+    # active tkinter main loop
+    root.mainloop()
+
 if __name__ == "__main__":
+
+    # variable algorithms contains all algorithms that user wants to compare
+    algorithms = ""
+
+    # call of user window
+    user_menu()
+
+    # LOCAL PRINT. SHOULD BE DELETED
+    print(algorithms)
+
     # hardcoded starting states
-    # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
