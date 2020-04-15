@@ -18,32 +18,42 @@ FIELD_SIZE = 100
 
 PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
 PUZZLE_IMAGES_EXT = ".png"
-WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
 BACKGROUND_COLOR = (255, 255, 255)
+green = (0, 255, 0)
+blue = (0, 0, 128)
+DISTANCE = 100        # Distance between two puzzles
+TOP_OFFSET = 0
+RIGHT_OFFSET = 50
+LEFT_OFFSET = 100
+BOTTOM_OFFSET = 250   # This is bigger beceuse we plan text under the puzzle
 ANIMATION_FIELD_SPEED = 5  # not every value will properly work
 ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
-PUZZLE_SIZE = 400
-PUZZLE_DIMENSION = 4
 
 
 class ThreadSolver(threading.Thread):
-    def __init__(self, solver, queue, args=None):
+    def __init__(self, solver, queue, ser_num, args=None):
         super().__init__(args=args)
         self.daemon = True
 
         self._solver = solver
         self._queue = queue
+        self.serial_num = ser_num   # First or second puzzle
 
     def run(self):
         state, offset_x, offset_y = args
 
+        if self.serial_num == 1:
+            puzzle_x = RIGHT_OFFSET
+        elif self.serial_num == 2:
+            puzzle_x = RIGHT_OFFSET + len(state) * FIELD_SIZE + DISTANCE
+
+        puzzle_y = TOP_OFFSET  # Both puzzles have the same y-coordinate
         result = self._solver.solve(state)
         puzzle = Puzzle(result[1][1],
-                        PUZZLE_X + offset_x, PUZZLE_Y + offset_y,
+                        puzzle_x, puzzle_y,
                         "plava",
-                        PUZZLE_SIZE,
-                        PUZZLE_DIMENSION)
+                        len(state))
         self._queue.put(puzzle)
 
 
@@ -226,10 +236,10 @@ def init_puzzle(algorithm):
     else:
         raise ValueError("Invalid algoritham")  # should never happen
 
-    puzzle = Puzzle(states_list,
-                    PUZZLE_X, PUZZLE_Y,
-                    "plava",
-                    PUZZLE_SIZE, PUZZLE_DIMENSION)
+    # puzzle = Puzzle(states_list,
+    #               PUZZLE_X, PUZZLE_Y,
+    #                "plava",
+    #                len(state))
 
     return puzzle
 
@@ -288,27 +298,59 @@ if __name__ == "__main__":
     #     [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]],
     # ]
 
+    # We hardcode this dimensions because we have a deal
+    # that window looks like this
+    if len(state) == 4:
+        window_width = RIGHT_OFFSET + 8 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 4 * FIELD_SIZE + BOTTOM_OFFSET
+    elif len(state) == 3:
+        window_width = RIGHT_OFFSET + 6 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 3 * FIELD_SIZE + BOTTOM_OFFSET
+    elif len(state) == 2:
+        window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
+        window_height = TOP_OFFSET + 2 * FIELD_SIZE + BOTTOM_OFFSET
+
     results_queue = Queue()
     threads_data = [
         (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
-        (WAstar(len(state), 4, mode="static"), state, PUZZLE_DIMENSION + 400, 0)
+        (WAstar(len(state), 4, mode="static"), state, 400, 0)
         # (Astar(len(state)), state, PUZZLE_DIMENSION + 400, 0)
     ]
 
+    i = 1  # Serial number of puzzle
     for solver, state, offset_x, offset_y in threads_data:
         args = (state, offset_x, offset_y)
-        cur_thread = ThreadSolver(solver, results_queue, args=args)
+        cur_thread = ThreadSolver(solver, results_queue, i, args=args)
         cur_thread.start()
+        i += 1
 
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen = pygame.display.set_mode((window_width, window_height))
+    pygame.display.set_caption('Loyd Puzzle')
+
+    icon = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "puzzle.png"))
+    pygame.display.set_icon(icon)
+
     screen.fill(BACKGROUND_COLOR)
+
+    # Text
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text1 = font.render('First', True, green, blue)
+    text2 = font.render('Second', True, green, blue)
+
+    textRect1 = text1.get_rect()
+    textRect2 = text2.get_rect()
+    textRect1.center = (RIGHT_OFFSET * 5, 50)
+    textRect2.center = (RIGHT_OFFSET * 5 + DISTANCE * 5, 50)
 
     loop_active = True
     while loop_active:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 loop_active = False
+
+        screen.blit(text1, textRect1)
+        screen.blit(text2, textRect2)
 
         cur_qsize = results_queue.qsize()
         while cur_qsize > 0:
