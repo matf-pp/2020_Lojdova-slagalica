@@ -3,24 +3,31 @@ from Field import Field
 
 class Puzzle:
 
-    def __init__(self, list_of_states, x, y, color, size, dimension):
+    #                                                400      4
+    # def __init__(self, list_of_states, x, y, color, size, dimension): -> staro
+    def __init__(self, list_of_states, x, y, color, size):
         r"""
         Arguments:
             list_of_states (list): List of all puzzle states.
             x, y (int): Upper left point of puzzle.
             color (int): Color of fields in puzzle
             size (int): Size of puzzle in pixels."""
+            
+        #_dimension = 400
+        #_n = 16  
+        #_size = 4
 
         self._list_of_states = list_of_states
         self._x, self._y = x, y
         self._color = color
-        self._size = size
-        self._dimension = dimension
-        self._n = dimension * dimension
-
+        self._size = size       # Size of puzzle. Can be 4,3 or 2
+        self._n = size * size   # Number of fields. Can be 16,9 or 4
+        self._field_size = 100  # Agreement by group
+        # Edge of puzzle in pixels
+        self._dimension = self._field_size * self._size
+        
         self._current_state_index = 0
         self._number_of_states = len(list_of_states)
-
         self._fields = self.initialize_fields()
 
     def current_puzzle_state(self):
@@ -54,7 +61,7 @@ class Puzzle:
         return self._color
 
     def get_field_size(self):
-        return round(self._size / self._dimension, 2)
+        return self._field_size
 
     def get_all_coordinates(self):
         r"""Count fields coordinates realtive to puzzle coordinates and field
@@ -70,7 +77,7 @@ class Puzzle:
 
             coords_list.append((tmp_x, tmp_y))
 
-            if (i + 1) % self._dimension == 0:
+            if (i + 1) % self._size == 0:
                 row += 1
                 col = -1
 
