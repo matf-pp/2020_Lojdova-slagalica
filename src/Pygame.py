@@ -1,10 +1,8 @@
-import threading
+import multiprocessing
 import pygame
 import time
 import sys
 import os
-
-from queue import Queue
 
 from Astar import Astar
 from IDAstar import IDAstar
@@ -31,21 +29,20 @@ ANIMATION_STATE_DURATION = 0.25
 PUZZLE_X, PUZZLE_Y = 30, 0
 
 
-class ThreadSolver(threading.Thread):
-    def __init__(self, solver, queue, ser_num, args=None):
-        super().__init__(args=args)
-        self.daemon = True
+class ProcessSolver(multiprocessing.Process):
+    def __init__(self, solver, queue, process_idx, args=None):
+        super().__init__(daemon=True, args=args)
 
         self._solver = solver
         self._queue = queue
-        self.serial_num = ser_num   # First or second puzzle
+        self._process_idx = process_idx
 
     def run(self):
-        state, offset_x, offset_y = args
+        state, offset_x, offset_y = self._args
 
-        if self.serial_num == 1:
+        if self._process_idx == 0:
             puzzle_x = RIGHT_OFFSET
-        elif self.serial_num == 2:
+        elif self._process_idx == 1:
             puzzle_x = RIGHT_OFFSET + len(state) * FIELD_SIZE + DISTANCE
 
         puzzle_y = TOP_OFFSET  # Both puzzles have the same y-coordinate
@@ -310,19 +307,18 @@ if __name__ == "__main__":
         window_width = RIGHT_OFFSET + 4 * FIELD_SIZE + DISTANCE + LEFT_OFFSET
         window_height = TOP_OFFSET + 2 * FIELD_SIZE + BOTTOM_OFFSET
 
-    results_queue = Queue()
-    threads_data = [
+    # results_queue = Queue()
+    results_queue = multiprocessing.Queue()
+    processes_data = [
         (WAstar(len(state), 4, mode="dynamic"), state, 0, 0),
         (WAstar(len(state), 4, mode="static"), state, 400, 0)
-        # (Astar(len(state)), state, PUZZLE_DIMENSION + 400, 0)
+        # (Astar(len(state)), state, 400, 0)
     ]
 
-    i = 1  # Serial number of puzzle
-    for solver, state, offset_x, offset_y in threads_data:
+    for i, (solver, state, offset_x, offset_y) in enumerate(processes_data):
         args = (state, offset_x, offset_y)
-        cur_thread = ThreadSolver(solver, results_queue, i, args=args)
-        cur_thread.start()
-        i += 1
+        cur_process = ProcessSolver(solver, results_queue, i, args=args)
+        cur_process.start()
 
     pygame.init()
     screen = pygame.display.set_mode((window_width, window_height))
