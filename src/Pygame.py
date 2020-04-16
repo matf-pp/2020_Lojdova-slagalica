@@ -4,6 +4,9 @@ import time
 import sys
 import os
 
+sys.path.extend([os.path.join(os.getcwd(), "utils")])
+from utils import is_solvable, serialize
+
 from Astar import Astar
 from IDAstar import IDAstar
 from BaseSolver import BaseSolver
@@ -33,6 +36,7 @@ PUZZLE_IMAGES_EXT = ".png"
 PUZZLE_DIST = 25
 FIELD_SIZE = 100
 
+
 class ProcessSolver(multiprocessing.Process):
     def __init__(self, solver, queue, args=None):
         super().__init__(daemon=True, args=args)
@@ -43,10 +47,16 @@ class ProcessSolver(multiprocessing.Process):
     def run(self):
         state, puzzle_x, puzzle_y = self._args
 
-        result = self._solver.solve(state)
-        puzzle = Puzzle(result[1][1],
-                        puzzle_x, puzzle_y,
-                        len(state))
+        if is_solvable(state):
+            result = self._solver.solve(state)
+            puzzle = Puzzle(result[1][1],
+                            puzzle_x, puzzle_y,
+                            len(state))
+        elif not is_solvable(state):
+            puzzle = Puzzle([serialize(state)],
+                            puzzle_x, puzzle_y,
+                            len(state))
+        
         self._queue.put(puzzle)
 
 
@@ -58,7 +68,7 @@ class Direction:
 
 def define_move_direction(puzzle_size, index_src, index_dest, value_src, value_dest):
     r"""Definens in which direction empty field of puzzle should be moved
-    
+
     If the difference between source and destinantion fields(in our case
     empty and exchage fields) is equal to puzzle size then our fields are
     one above the other. In other case they are side by side.
@@ -189,10 +199,10 @@ def move_field(current_state, zero_field, exchange_field, target,
                     screen.blit(img, (field_x, field_y))
 
 
-def draw_puzzle(current_state, puzzle_x, puzzle_y):
+def draw_puzzle(current_state, puzzle_x, puzzle_y, ind_solvable):
     r"""Function iterates through current state of the puzzle
     and draws all fields as a images
-    
+
     In the place of empty(zero) field nothing should be draw so we
     skip the field with value 0
     """
@@ -208,8 +218,15 @@ def draw_puzzle(current_state, puzzle_x, puzzle_y):
                                              str(value) + PUZZLE_IMAGES_EXT))
         screen.blit(img, (field_x, field_y))
 
+    # When puzzle doesn't have solution
+    # Position is hardcode to be in center of window
+    if ind_solvable == 0:
+        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH + "/stop.png"))
+        screen.blit(img, (scene_width / 4 + PUZZLE_DIST - FIELD_SIZE / 2,
+                          scene_height / 2 - FIELD_SIZE / 2))
 
-def solve_puzzle(puzzle, puzzle_x, puzzle_y):
+
+def solve_puzzle(puzzle, puzzle_x, puzzle_y, ind_solvable):
     r"""Function gets current state of puzzle, draws puzzle, gets difference
     between current and the next state of the puzzle, and makes transition
     from current to the next state"""
@@ -217,7 +234,7 @@ def solve_puzzle(puzzle, puzzle_x, puzzle_y):
     current_state = puzzle._fields
 
     # draw state without animation
-    draw_puzzle(current_state, puzzle_x, puzzle_y)
+    draw_puzzle(current_state, puzzle_x, puzzle_y, ind_solvable)
 
     # get difference between current and next state
     if puzzle.next_puzzle_state() is not None:
@@ -309,7 +326,7 @@ def user_menu():
     # this function creates string that contains names of all algorithms that
     # user wants to compare
     def get_algorithms():
-   
+
         global algorithms
 
         # special variables in tkinter library can return their value
@@ -373,6 +390,7 @@ def user_menu():
     # active tkinter main loop
     root.mainloop()
 
+
 if __name__ == "__main__":
 
     # variable algorithms contains all algorithms that user wants to compare
@@ -385,12 +403,17 @@ if __name__ == "__main__":
     print(algorithms)
 
     # hardcoded starting states
-    state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
+    # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
     # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
     scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + FONT_SIZE
+
+    ind_solvable = 1  # Puzzle can be solved
+    if not is_solvable(state):
+        ind_solvable = 0  # Puzzle can't be solved
 
     screen = init_scene(scene_width, scene_height)
 
@@ -422,7 +445,8 @@ if __name__ == "__main__":
             cur_qsize -= 1
             cur_puzzle = results_queue.get()
             (cur_puzzle_x, cur_puzzle_y) = cur_puzzle.get_puzzle_coordinates()
-            flag = solve_puzzle(cur_puzzle, cur_puzzle_x, cur_puzzle_y)  # TODO
+            flag = solve_puzzle(cur_puzzle, cur_puzzle_x, cur_puzzle_y,
+                                ind_solvable)  # TODO
             if flag:
                 results_queue.put(cur_puzzle)
 
