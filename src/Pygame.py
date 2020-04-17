@@ -330,9 +330,12 @@ def user_menu():
     def get_algorithms():
 
         global algorithms
+        global puzzle_size
 
         # special variables in tkinter library can return their value
         # only with get method of the varible
+
+        # get algorithms that user wants to comapre
         if WAstar_dynamic_variable.get():
             algorithms += "WAstar_dynamic,"
         if WAstar_static_variable.get():
@@ -342,11 +345,19 @@ def user_menu():
         if Astar_variable.get():
             algorithms += "Astar,"
 
+        # get size of puzzle that user wants to use
+        if Puzzle_size.get() == 3:
+            puzzle_size = 3
+        elif Puzzle_size.get() == 4:
+            puzzle_size = 4
+
         algorithms = algorithms[0:len(algorithms)-1]
+        root.destroy()
 
     # this part creates tkinter window
     root = Tk()
-    root.geometry('400x300')
+    root.geometry('700x300')
+    root.config(background = 'blue')
 
     # special tkinter variables that contains informations from checkboxes
     WAstar_dynamic_variable = BooleanVar()
@@ -354,40 +365,55 @@ def user_menu():
     IDAstar_variable = BooleanVar()
     Astar_variable = BooleanVar()
 
+    Puzzle_size = IntVar()
+
     # create new Checkbutton and its attributes
     WAstar_dynamic_box = Checkbutton(root, text="WAstar dynamic algorithm",
                                      variable=WAstar_dynamic_variable,
                                      onvalue = True,
                                      offvalue = False)
-    WAstar_dynamic_box.config(font=(FONT, 14))
+    WAstar_dynamic_box.config(font=(FONT, 14), background = 'blue')
     WAstar_dynamic_box.place(relx = 0.01, rely = 0.01)
 
     WAstar_static_box = Checkbutton(root, text="WAstar static algorithm",
                                      variable=WAstar_static_variable,
                                      onvalue = True,
                                      offvalue = False)
-    WAstar_static_box.config(font=(FONT, 14))
+    WAstar_static_box.config(font=(FONT, 14), background = 'blue')
     WAstar_static_box.place(relx = 0.01, rely = 0.1)
 
     IDAstar_box = Checkbutton(root, text="IDAstar algorithm",
                                      variable = IDAstar_variable,
                                      onvalue = True,
                                      offvalue = False)
-    IDAstar_box.config(font=(FONT, 14))
+    IDAstar_box.config(font=(FONT, 14), background = 'blue')
     IDAstar_box.place(relx = 0.01, rely = 0.2)
 
     Astar_box = Checkbutton(root, text="Astar algorithm",
                                      variable=Astar_variable,
                                      onvalue = True,
                                      offvalue = False)
-    Astar_box.config(font=(FONT, 14))
+    Astar_box.config(font=(FONT, 14), background = 'blue')
     Astar_box.place(relx = 0.01,  rely = 0.3)
+
+    # create new Checkbutton and its attributes
+    Puzzle_size_3_box = Radiobutton(root, text="3x3",
+                                    variable=Puzzle_size,
+                                    value = 3)
+    Puzzle_size_3_box.config(font=(FONT, 14), background = 'blue')
+    Puzzle_size_3_box.place(relx = 0.85, rely = 0.1)
+
+    Puzzle_size_4_box = Radiobutton(root, text="4x4",
+                                    variable=Puzzle_size,
+                                    value = 4)
+    Puzzle_size_4_box.config(font=(FONT, 14), background = 'blue')
+    Puzzle_size_4_box.place(relx = 0.85, rely = 0.2)
 
     # create new Button and its atributes
     submit = Button(root, text = "Submit",
                     command = get_algorithms)
     submit.config(height = 5, width = 20, background = "red")
-    submit.place(relx = 0.5, rely = 0.5, anchor = CENTER)
+    submit.place(relx = 0.5, rely = 0.7, anchor = CENTER)
 
     # active tkinter main loop
     root.mainloop()
@@ -397,12 +423,14 @@ if __name__ == "__main__":
 
     # variable algorithms contains all algorithms that user wants to compare
     algorithms = ""
+    puzzle_size = 0
 
     # call of user window
-    # user_menu()
+    user_menu()
 
     # LOCAL PRINT. SHOULD BE DELETED
     print(algorithms)
+    print(puzzle_size)
 
     # hardcoded starting states
     # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
