@@ -16,7 +16,7 @@ from Puzzle import Puzzle
 from tkinter import *
 
 # font related
-FONT_COLOR = (128, 128, 128)
+FONT_COLOR = (31, 33, 43)
 FONT_SIZE = 24
 FONT = "Courier"
 
@@ -45,14 +45,14 @@ class ProcessSolver(multiprocessing.Process):
         self._queue = queue
 
     def run(self):
-        state, puzzle_x, puzzle_y = self._args
+        state, puzzle_solvability, puzzle_x, puzzle_y = self._args
 
-        if is_solvable(state):
+        if puzzle_solvability:
             result = self._solver.solve(state)
             puzzle = Puzzle(result[1][1],
                             puzzle_x, puzzle_y,
                             len(state))
-        elif not is_solvable(state):
+        else:
             puzzle = Puzzle([serialize(state)],
                             puzzle_x, puzzle_y,
                             len(state))
@@ -68,18 +68,17 @@ class Direction:
 
 def define_move_direction(puzzle_size, index_src, index_dest, value_src,
                           value_dest):
-    r"""Definens in which direction empty field of puzzle should be moved
+    r"""Definens in which direction empty field of puzzle should be moved.
 
     If the difference between source and destinantion fields(in our case
     empty and exchage fields) is equal to puzzle size then our fields are
     one above the other. In other case they are side by side.
 
     The field with a smaller index is above the other (or on the left side
-    if they stands side by side)
+    if they stands side by side).
 
     With all of these we can define position of the empty field relative
-    to exchange field
-    """
+    to exchange field."""
 
     if_cond = value_src == 0 and index_src < index_dest
     if_cond = if_cond or (value_dest == 0 and index_dest < index_src)
@@ -90,49 +89,43 @@ def define_move_direction(puzzle_size, index_src, index_dest, value_src,
         return Direction.RIGHT if if_cond else Direction.LEFT
 
 
-def get_zero_and_exchange_field(index1, index2, value1, current_state):
+def get_zero_and_exchange_field(exchange_index, zero_index, value,
+                                current_state):
     r"""Function defines which index corresponds to exchange and which
-    corresponds to empty (zero) field
+    corresponds to empty (zero) field.
 
     If the value of first field is zero, then zero field stands in position
     of the first index in current state and exchange field belongs to other
-    index
+    index.
 
     In other case exchange field is at the first and zero field at the second
-    index position
-    """
-    exchange, zero = None, None
+    index position."""
 
-    if value1 == 0:
-        exchange = current_state[index2]
-        zero = current_state[index1]
-    else:
-        exchange = current_state[index1]
-        zero = current_state[index2]
+    if value != 0:
+        exchange_index, zero_index = zero_index, exchange_index
 
-    return exchange, zero
+    return current_state[zero_index], current_state[exchange_index]
 
 
 def move_field(current_state, zero_field, exchange_field, target,
                move_direction, puzzle_x, puzzle_y):
-
     r"""At first, function determines direction in which empty field
     is seted to be moved.
 
     Then, function swaps fields by increasing/decresaing coordinates
     of either empty and exchange field. If the move direction is up or down
-    only y coordinate should be changed (in other case only x coordinate should
-    be changed for both fields). It is enough to check only one field coordinate
-    (in our case we check empty field coordinate)
+    only `y` coordinate should be changed (in other case only `x` coordinate
+    should be changed for both fields). It is enough to check only one field
+    coordinate (in our case we check empty field coordinate).
 
-    If zero field should move up, its y coordinate should decrease, and the
+    If zero field should move up, its `y` coordinate should decrease, and the
     sign variable is set to be negative number. With same logic we define sign
-    variable for other directions
+    variable for other directions.
 
     When we define target coordinate, its value and direction of move,
     main loop of this function changes both coordinates of empty and exchange
-    field by increasing/decreasing them for the value of sign variable
-    """
+    field by increasing/decreasing them for the value of sign variable."""
+
     if move_direction == Direction.UP:
         zero_field_variable = zero_field._y
         sign = -ANIMATION_FIELD_SPEED
@@ -201,13 +194,12 @@ def move_field(current_state, zero_field, exchange_field, target,
                     screen.blit(img, (field_x, field_y))
 
 
-def draw_puzzle(current_state, puzzle_x, puzzle_y, ind_solvable):
+def draw_puzzle(current_state, puzzle_solvability):
     r"""Function iterates through current state of the puzzle
-    and draws all fields as a images
+    and draws all fields as a images.
 
     In the place of empty(zero) field nothing should be draw so we
-    skip the field with value 0
-    """
+    skip the field with value 0."""
 
     for field in current_state:
         value = field._value
@@ -220,23 +212,24 @@ def draw_puzzle(current_state, puzzle_x, puzzle_y, ind_solvable):
                                              str(value) + PUZZLE_IMAGES_EXT))
         screen.blit(img, (field_x, field_y))
 
-    # When puzzle doesn't have solution
-    # Position is hardcode to be in center of window
-    if ind_solvable == 0:
-        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH + "/stop.png"))
-        screen.blit(img, (scene_width / 4 + PUZZLE_DIST - FIELD_SIZE / 2,
-                          scene_height / 2 - FIELD_SIZE / 2))
+    # when puzzle doesn't have solution
+    if not puzzle_solvability:
+        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "stop.png"))
+        img_width, img_height = img.get_size()
+        screen.blit(img, (scene_width // 2 - img_width // 2,
+                          scene_height // 2 - img_height // 2))
 
 
-def solve_puzzle(puzzle, puzzle_x, puzzle_y, ind_solvable):
+def solve_puzzle(puzzle, puzzle_solvability):
     r"""Function gets current state of puzzle, draws puzzle, gets difference
     between current and the next state of the puzzle, and makes transition
-    from current to the next state"""
+    from current to the next state."""
 
     current_state = puzzle._fields
+    puzzle_x, puzzle_y = puzzle.get_puzzle_coordinates()
 
     # draw state without animation
-    draw_puzzle(current_state, puzzle_x, puzzle_y, ind_solvable)
+    draw_puzzle(current_state, puzzle_solvability)
 
     # get difference between current and next state
     if puzzle.next_puzzle_state() is not None:
@@ -304,11 +297,11 @@ def init_scene(scene_width, scene_height):
     screen.fill(BACKGROUND_COLOR)
 
     # font = pygame.font.Font("./src/fonts/calibri.ttf", FONT_SIZE)  # test font 1
-    # font = pygame.font.Font("./src/fonts/Pacifico.ttf", FONT_SIZE) # test font 2
-    # font = pygame.font.Font("./src/fonts/Xcelsion Italic.ttf", FONT_SIZE) # test font 3
-    # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", FONT_SIZE) # test font 4
-    # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", FONT_SIZE) # test font 5
-    font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", FONT_SIZE) # test font 6
+    # font = pygame.font.Font("./src/fonts/Pacifico.ttf", FONT_SIZE)  # test font 2
+    # font = pygame.font.Font("./src/fonts/Xcelsion Italic.ttf", FONT_SIZE)  # test font 3
+    # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", FONT_SIZE)  # test font 4
+    # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", FONT_SIZE)  # test font 5
+    font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", FONT_SIZE)  # test font 6
     text_upper_left = font.render("WA* dynamic", True, FONT_COLOR,
                                   BACKGROUND_COLOR)
     textrect_upper_left = text_upper_left.get_rect()
@@ -404,23 +397,21 @@ if __name__ == "__main__":
     algorithms = ""
 
     # call of user window
-    user_menu()
+    # user_menu()
 
     # LOCAL PRINT. SHOULD BE DELETED
     print(algorithms)
 
     # hardcoded starting states
     # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
-    # state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
+    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
     scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + FONT_SIZE
 
-    ind_solvable = 1  # Puzzle can be solved
-    if not is_solvable(state):
-        ind_solvable = 0  # Puzzle can't be solved
+    puzzle_solvability = is_solvable(state)
 
     screen = init_scene(scene_width, scene_height)
 
@@ -437,7 +428,7 @@ if __name__ == "__main__":
     # running daemon processes for each algorithm
     results_queue = multiprocessing.Queue()
     for solver, state, offset_x, offset_y in multiprocessing_data:
-        args = (state, offset_x, offset_y)
+        args = (state, puzzle_solvability, offset_x, offset_y)
         cur_process = ProcessSolver(solver, results_queue, args=args)
         cur_process.start()
 
@@ -451,9 +442,7 @@ if __name__ == "__main__":
         while cur_qsize > 0:
             cur_qsize -= 1
             cur_puzzle = results_queue.get()
-            (cur_puzzle_x, cur_puzzle_y) = cur_puzzle.get_puzzle_coordinates()
-            flag = solve_puzzle(cur_puzzle, cur_puzzle_x, cur_puzzle_y,
-                                ind_solvable)  # TODO
+            flag = solve_puzzle(cur_puzzle, puzzle_solvability)  # TODO
             if flag:
                 results_queue.put(cur_puzzle)
 
