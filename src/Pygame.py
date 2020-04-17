@@ -331,6 +331,11 @@ def user_menu():
 
         global algorithms
         global puzzle_size
+        num_of_selected_algorithms = 0
+
+        # if user clicks few times on submit algorithms string must be
+        # recreated
+        algorithms = ""
 
         # special variables in tkinter library can return their value
         # only with get method of the varible
@@ -338,12 +343,16 @@ def user_menu():
         # get algorithms that user wants to comapre
         if WAstar_dynamic_variable.get():
             algorithms += "WAstar_dynamic,"
+            num_of_selected_algorithms += 1
         if WAstar_static_variable.get():
             algorithms += "WAstar_static,"
+            num_of_selected_algorithms += 1
         if IDAstar_variable.get():
             algorithms += "IDAstar,"
+            num_of_selected_algorithms += 1
         if Astar_variable.get():
             algorithms += "Astar,"
+            num_of_selected_algorithms += 1
 
         # get size of puzzle that user wants to use
         if Puzzle_size.get() == 3:
@@ -352,7 +361,11 @@ def user_menu():
             puzzle_size = 4
 
         algorithms = algorithms[0:len(algorithms)-1]
-        root.destroy()
+        if len(algorithms) < 1 or puzzle_size == 0 or\
+            num_of_selected_algorithms != 2:
+            pass
+        else:
+            root.destroy()
 
     # this part creates tkinter window
     root = Tk()
