@@ -4,6 +4,11 @@ import time
 import sys
 import os
 
+import numpy as np
+
+from argparse import Namespace
+from functools import partial
+
 sys.path.extend([os.path.join(os.getcwd(), "utils")])
 from utils import is_solvable, serialize
 
@@ -13,12 +18,18 @@ from BaseSolver import BaseSolver
 from WAstar import WAstar
 from Field import Field
 from Puzzle import Puzzle
+
 from tkinter import *
 
 # font related
 FONT_COLOR = (31, 33, 43)
-FONT_SIZE = 24
+SCENE_FONT_SIZE = 24
+USER_MENU_FONT_SIZE = 14
+USER_MENU_WIDTH, USER_MENU_HEIGHT = 400, 300
 FONT = "Courier"
+
+PADDING_X = 40
+PADDING_Y = 5
 
 # scene related
 TOP_OFFSET = 0
@@ -48,16 +59,46 @@ class ProcessSolver(multiprocessing.Process):
         state, puzzle_solvability, puzzle_x, puzzle_y = self._args
 
         if puzzle_solvability:
+            # if puzzle has solution we need to find one
             result = self._solver.solve(state)
             puzzle = Puzzle(result[1][1],
                             puzzle_x, puzzle_y,
                             len(state))
         else:
+            # there is no solution - list of states has length 1
             puzzle = Puzzle([serialize(state)],
                             puzzle_x, puzzle_y,
                             len(state))
 
         self._queue.put(puzzle)
+
+
+class Algorithms:
+    r"""Enum class for algorithms."""
+
+    ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
+
+    @staticmethod
+    def get_algorithm_name(idx):
+        if idx == Algorithms.ASTAR:
+            return "A*"
+        elif idx == Algorithms.IDASTAR:
+            return "IDA*"
+        elif idx == Algorithms.WASTAR_D:
+            return "Dynamic WA*"
+        elif idx == Algorithms.WASTAR_S:
+            return "Static WA*"
+
+    @staticmethod
+    def get_algorithm(idx):
+        if idx == Algorithms.ASTAR:
+            return Astar
+        elif idx == Algorithms.IDASTAR:
+            return IDAstar
+        elif idx == Algorithms.WASTAR_D:
+            return partial(WAstar, weight=4, mode="dynamic")
+        elif idx == Algorithms.WASTAR_S:
+            return partial(WAstar, weight=4, mode="static")
 
 
 class Direction:
@@ -298,24 +339,28 @@ def init_scene(scene_width, scene_height):
     pygame.display.set_icon(icon)
     screen.fill(BACKGROUND_COLOR)
 
-    # font = pygame.font.Font("./src/fonts/calibri.ttf", FONT_SIZE)  # test font 1
-    # font = pygame.font.Font("./src/fonts/Pacifico.ttf", FONT_SIZE)  # test font 2
-    # font = pygame.font.Font("./src/fonts/Xcelsion Italic.ttf", FONT_SIZE)  # test font 3
-    # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", FONT_SIZE)  # test font 4
-    # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", FONT_SIZE)  # test font 5
-    font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", FONT_SIZE)  # test font 6
-    text_upper_left = font.render("WA* dynamic", True, FONT_COLOR,
+    # font = pygame.font.Font("./src/fonts/calibri.ttf", SCENE_FONT_SIZE)  # test font 1
+    # font = pygame.font.Font("./src/fonts/Pacifico.ttf", SCENE_FONT_SIZE)  # test font 2
+    # font = pygame.font.Font("./src/fonts/Xcelsion Italic.ttf", SCENE_FONT_SIZE)  # test font 3
+    # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", SCENE_FONT_SIZE)  # test font 4
+    # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", SCENE_FONT_SIZE)  # test font 5
+    font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", SCENE_FONT_SIZE)  # test font 6
+    text_upper_left = font.render(Algorithms.get_algorithm_name(puzzle_data.algorithms[0]),
+                                  True,
+                                  FONT_COLOR,
                                   BACKGROUND_COLOR)
     textrect_upper_left = text_upper_left.get_rect()
     textrect_upper_left.center = (LEFT_OFFSET + len(state) * FIELD_SIZE // 2,
-                                  TOP_OFFSET + (len(state)) * FIELD_SIZE + FONT_SIZE // 2)
+                                  TOP_OFFSET + (len(state)) * FIELD_SIZE + SCENE_FONT_SIZE // 2)
     screen.blit(text_upper_left, textrect_upper_left)
 
-    text_upper_right = font.render("WA* static", True, FONT_COLOR,
+    text_upper_right = font.render(Algorithms.get_algorithm_name(puzzle_data.algorithms[1]),
+                                   True,
+                                   FONT_COLOR,
                                    BACKGROUND_COLOR)
     textrect_upper_right = text_upper_right.get_rect()
     textrect_upper_right.center = (scene_width - RIGHT_OFFSET - len(state) * FIELD_SIZE // 2,
-                                   TOP_OFFSET + (len(state)) * FIELD_SIZE + FONT_SIZE // 2)
+                                   TOP_OFFSET + (len(state)) * FIELD_SIZE + SCENE_FONT_SIZE // 2)
     screen.blit(text_upper_right, textrect_upper_right)
 
     return screen
@@ -325,145 +370,182 @@ def user_menu():
     r"""function draws basic tkinter window that allows user to select
     which algorithms dose he wants to compare"""
 
-    # this function creates string that contains names of all algorithms that
-    # user wants to compare
+    puzzle_data = dict()
+
     def get_algorithms():
-
-        global algorithms
-        global puzzle_size
-        num_of_selected_algorithms = 0
-
-        # if user clicks few times on submit algorithms string must be
-        # recreated
-        algorithms = ""
-
-        # special variables in tkinter library can return their value
-        # only with get method of the varible
-
-        # get algorithms that user wants to comapre
-        if WAstar_dynamic_variable.get():
-            algorithms += "WAstar_dynamic,"
-            num_of_selected_algorithms += 1
-        if WAstar_static_variable.get():
-            algorithms += "WAstar_static,"
-            num_of_selected_algorithms += 1
-        if IDAstar_variable.get():
-            algorithms += "IDAstar,"
-            num_of_selected_algorithms += 1
-        if Astar_variable.get():
-            algorithms += "Astar,"
-            num_of_selected_algorithms += 1
+        algorithms = []
+        if tk_var_wastar_dynamic.get():
+            algorithms.append(Algorithms.WASTAR_D)
+        if tk_var_wastar_static.get():
+            algorithms.append(Algorithms.WASTAR_S)
+        if tk_var_idastar.get():
+            algorithms.append(Algorithms.IDASTAR)
+        if tk_var_astar.get():
+            algorithms.append(Algorithms.ASTAR)
+        puzzle_data["algorithms"] = algorithms
 
         # get size of puzzle that user wants to use
-        if Puzzle_size.get() == 3:
-            puzzle_size = 3
-        elif Puzzle_size.get() == 4:
+        if tk_var_puzzle_size.get() == 3:
+            puzzle_data["size"] = 3
+        elif tk_var_puzzle_size.get() == 4:
+            puzzle_data["size"] = 4
             puzzle_size = 4
 
-        algorithms = algorithms[0:len(algorithms)-1]
-        if len(algorithms) < 1 or puzzle_size == 0 or\
-            num_of_selected_algorithms != 2:
-            pass
+        if len(algorithms) != 2:
+            popup = Tk()
+            popup.wm_title("!")
+
+            tk_lbl_condition = Label(popup,
+                                     text="Select 2 algorithms",
+                                     padx=PADDING_X,
+                                     pady=PADDING_Y)
+            tk_lbl_condition.pack(side="top", anchor="center")
+            tk_btn_okay = Button(popup,
+                                 text="OK",
+                                 command=popup.destroy,
+                                 padx=PADDING_X)
+            tk_btn_okay.pack()
+
+            popup.mainloop()
         else:
             root.destroy()
 
-    # this part creates tkinter window
+    # tkinter window init
     root = Tk()
-    root.geometry('700x300')
-    root.config(background = 'blue')
+    root.config(background="white")
+
+    tk_frame_btn = Frame(root)
+
+    # three separate containers for content of the menu
+    tk_frame_btn.pack(side="bottom", fill="both", expand=False)
+    tk_frame_cb = Frame(root)
+    tk_frame_cb.pack(side="left", fill="both", expand=False)
+    tk_frame_rb = Frame(root)
+    tk_frame_rb.pack(side="right", fill="both", expand=False)
 
     # special tkinter variables that contains informations from checkboxes
-    WAstar_dynamic_variable = BooleanVar()
-    WAstar_static_variable = BooleanVar()
-    IDAstar_variable = BooleanVar()
-    Astar_variable = BooleanVar()
+    tk_var_wastar_dynamic = BooleanVar()
+    tk_var_wastar_static = BooleanVar()
+    tk_var_idastar = BooleanVar()
+    tk_var_astar = BooleanVar()
+    tk_var_puzzle_size = IntVar()
 
-    Puzzle_size = IntVar()
+    # creating checkboxes
+    tk_cb_wastar_dynamic = Checkbutton(tk_frame_cb,
+                                       text="Dynamic weighted A*",
+                                       variable=tk_var_wastar_dynamic,
+                                       onvalue=True,
+                                       offvalue=False,
+                                       padx=PADDING_X,
+                                       pady=PADDING_Y)
+    tk_cb_wastar_dynamic.pack(side=TOP, anchor=W)
 
-    # create new Checkbutton and its attributes
-    WAstar_dynamic_box = Checkbutton(root, text="WAstar dynamic algorithm",
-                                     variable=WAstar_dynamic_variable,
-                                     onvalue = True,
-                                     offvalue = False)
-    WAstar_dynamic_box.config(font=(FONT, 14), background = 'blue')
-    WAstar_dynamic_box.place(relx = 0.01, rely = 0.01)
+    tk_cb_wastar_static = Checkbutton(tk_frame_cb,
+                                      text="Static weighted A*",
+                                      variable=tk_var_wastar_static,
+                                      onvalue=True,
+                                      offvalue=False,
+                                      padx=PADDING_X,
+                                      pady=PADDING_Y)
+    tk_cb_wastar_static.pack(side=TOP, anchor=W)
 
-    WAstar_static_box = Checkbutton(root, text="WAstar static algorithm",
-                                     variable=WAstar_static_variable,
-                                     onvalue = True,
-                                     offvalue = False)
-    WAstar_static_box.config(font=(FONT, 14), background = 'blue')
-    WAstar_static_box.place(relx = 0.01, rely = 0.1)
+    tk_cb_idastar = Checkbutton(tk_frame_cb,
+                                text="Iterative deepening A*",
+                                variable=tk_var_idastar,
+                                onvalue=True,
+                                offvalue=False,
+                                padx=PADDING_X,
+                                pady=PADDING_Y)
+    tk_cb_idastar.pack(side=TOP, anchor=W)
 
-    IDAstar_box = Checkbutton(root, text="IDAstar algorithm",
-                                     variable = IDAstar_variable,
-                                     onvalue = True,
-                                     offvalue = False)
-    IDAstar_box.config(font=(FONT, 14), background = 'blue')
-    IDAstar_box.place(relx = 0.01, rely = 0.2)
+    tk_cb_astar = Checkbutton(tk_frame_cb,
+                              text="Standard A*",
+                              variable=tk_var_astar,
+                              onvalue=True,
+                              offvalue=False,
+                              padx=PADDING_X,
+                              pady=PADDING_Y)
+    tk_cb_astar.pack(side=TOP, anchor=W)
 
-    Astar_box = Checkbutton(root, text="Astar algorithm",
-                                     variable=Astar_variable,
-                                     onvalue = True,
-                                     offvalue = False)
-    Astar_box.config(font=(FONT, 14), background = 'blue')
-    Astar_box.place(relx = 0.01,  rely = 0.3)
+    # creating radiobuttons
+    tk_rb_3x3 = Radiobutton(tk_frame_rb,
+                            text="3x3",
+                            variable=tk_var_puzzle_size,
+                            value=3,
+                            padx=PADDING_X,
+                            pady=PADDING_Y)
+    tk_rb_3x3.pack(side=TOP, anchor=W)
 
-    # create new Checkbutton and its attributes
-    Puzzle_size_3_box = Radiobutton(root, text="3x3",
-                                    variable=Puzzle_size,
-                                    value = 3)
-    Puzzle_size_3_box.config(font=(FONT, 14), background = 'blue')
-    Puzzle_size_3_box.place(relx = 0.85, rely = 0.1)
+    tk_rb_4x4 = Radiobutton(tk_frame_rb,
+                            text="4x4",
+                            variable=tk_var_puzzle_size,
+                            value=4,
+                            padx=PADDING_X,
+                            pady=PADDING_Y)
+    tk_rb_4x4.pack(side=TOP, anchor=W)
 
-    Puzzle_size_4_box = Radiobutton(root, text="4x4",
-                                    variable=Puzzle_size,
-                                    value = 4)
-    Puzzle_size_4_box.config(font=(FONT, 14), background = 'blue')
-    Puzzle_size_4_box.place(relx = 0.85, rely = 0.2)
-
-    # create new Button and its atributes
-    submit = Button(root, text = "Submit",
-                    command = get_algorithms)
-    submit.config(height = 5, width = 20, background = "red")
-    submit.place(relx = 0.5, rely = 0.7, anchor = CENTER)
+    # creating submit button
+    tk_btn_submit = Button(tk_frame_btn,
+                           text="Submit",
+                           command=get_algorithms)
+    tk_btn_submit.pack(side=TOP, anchor=CENTER)
 
     # active tkinter main loop
     root.mainloop()
+
+    return Namespace(**puzzle_data)
+
+
+def generate_state(N):
+    state = np.arange(N * N)
+
+    timestamp = int(time.time())
+    np.random.seed(timestamp)
+    np.random.shuffle(state)
+    state = state.reshape((N, N))
+
+    return state.tolist()
 
 
 if __name__ == "__main__":
 
     # variable algorithms contains all algorithms that user wants to compare
-    algorithms = ""
+    algorithms = []
     puzzle_size = 0
 
     # call of user window
-    user_menu()
-
-    # LOCAL PRINT. SHOULD BE DELETED
-    print(algorithms)
-    print(puzzle_size)
+    puzzle_data = user_menu()
 
     # hardcoded starting states
     # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
     # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
-    state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
+    # state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
+
+    state = generate_state(puzzle_data.size)
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
-    scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + FONT_SIZE
+    scene_height = VERTICAL_OFFSET + len(state) * FIELD_SIZE + SCENE_FONT_SIZE
 
     puzzle_solvability = is_solvable(state)
 
     screen = init_scene(scene_width, scene_height)
 
     # necessary arguments for each process
+    # multiprocessing_data = [
+    #     (WAstar(len(state), 4, mode="dynamic"),
+    #      state,
+    #      LEFT_OFFSET, TOP_OFFSET),
+    #     (WAstar(len(state), 4, mode="static"),
+    #      state,
+    #      LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
+    # ]
+
     multiprocessing_data = [
-        (WAstar(len(state), 4, mode="dynamic"),
+        (Algorithms.get_algorithm(puzzle_data.algorithms[0])(len(state)),
          state,
          LEFT_OFFSET, TOP_OFFSET),
-        (WAstar(len(state), 4, mode="static"),
+        (Algorithms.get_algorithm(puzzle_data.algorithms[1])(len(state)),
          state,
          LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
     ]
