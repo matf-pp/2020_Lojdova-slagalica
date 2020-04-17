@@ -232,6 +232,8 @@ def solve_puzzle(puzzle, puzzle_solvability):
     draw_puzzle(current_state, puzzle_solvability)
 
     # get difference between current and next state
+    # In new puzzle state we will have value1 in field with index1
+    # and value2 in field with index2
     if puzzle.next_puzzle_state() is not None:
         index1, value1, index2, value2 = puzzle.states_difference(
             puzzle.current_puzzle_state(),

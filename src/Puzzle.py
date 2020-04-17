@@ -105,13 +105,17 @@ class Puzzle:
         return fields
 
     def states_difference(self, current_st, next_st):
+        r'''index1 and index2 are indexes of fields in list self._fields
+            that have changed between two puzzle states.
+            new_val1 and new_val2 are values of these fields.'''
+
         for i in range(self._n):
             if current_st[i] != next_st[i]:
-                # first changed field
+                # first changed field(index1, new_val1)
                 index1 = i
                 new_val1 = next_st[i]
 
-                # second changed field
+                # second changed field(index2, new_val2)
                 for j in range(i + 1, self._n):
                     if current_st[j] != next_st[j]:
                         index2 = j
@@ -119,6 +123,8 @@ class Puzzle:
                         break
                 break
 
+        # Function returns variables in this order because of function
+        # solve_puzzle in the file where we draw puzzle
         return index2, new_val1, index1, new_val2
 
     def states_change(self):
