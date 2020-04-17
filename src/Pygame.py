@@ -56,7 +56,7 @@ class ProcessSolver(multiprocessing.Process):
             puzzle = Puzzle([serialize(state)],
                             puzzle_x, puzzle_y,
                             len(state))
-        
+
         self._queue.put(puzzle)
 
 
@@ -66,14 +66,15 @@ class Direction:
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
-def define_move_direction(puzzle_size, index_src, index_dest, value_src, value_dest):
+def define_move_direction(puzzle_size, index_src, index_dest, value_src,
+                          value_dest):
     r"""Definens in which direction empty field of puzzle should be moved
 
     If the difference between source and destinantion fields(in our case
     empty and exchage fields) is equal to puzzle size then our fields are
     one above the other. In other case they are side by side.
 
-    The field with a smaller index is above the other (or on the left side 
+    The field with a smaller index is above the other (or on the left side
     if they stands side by side)
 
     With all of these we can define position of the empty field relative
@@ -94,10 +95,11 @@ def get_zero_and_exchange_field(index1, index2, value1, current_state):
     corresponds to empty (zero) field
 
     If the value of first field is zero, then zero field stands in position
-    of the first index in current state and exchange field belongs to other index
+    of the first index in current state and exchange field belongs to other
+    index
 
     In other case exchange field is at the first and zero field at the second
-    index position 
+    index position
     """
     exchange, zero = None, None
 
@@ -230,7 +232,7 @@ def solve_puzzle(puzzle, puzzle_x, puzzle_y, ind_solvable):
     r"""Function gets current state of puzzle, draws puzzle, gets difference
     between current and the next state of the puzzle, and makes transition
     from current to the next state"""
-    
+
     current_state = puzzle._fields
 
     # draw state without animation
@@ -301,7 +303,12 @@ def init_scene(scene_width, scene_height):
     pygame.display.set_icon(icon)
     screen.fill(BACKGROUND_COLOR)
 
-    font = pygame.font.Font("./src/fonts/calibri.ttf", FONT_SIZE)  # test font
+    # font = pygame.font.Font("./src/fonts/calibri.ttf", FONT_SIZE)  # test font 1
+    # font = pygame.font.Font("./src/fonts/Pacifico.ttf", FONT_SIZE) # test font 2
+    # font = pygame.font.Font("./src/fonts/Xcelsion Italic.ttf", FONT_SIZE) # test font 3
+    # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", FONT_SIZE) # test font 4
+    # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", FONT_SIZE) # test font 5
+    font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", FONT_SIZE) # test font 6
     text_upper_left = font.render("WA* dynamic", True, FONT_COLOR,
                                   BACKGROUND_COLOR)
     textrect_upper_left = text_upper_left.get_rect()
@@ -330,7 +337,7 @@ def user_menu():
         global algorithms
 
         # special variables in tkinter library can return their value
-        # only with get method of the varible 
+        # only with get method of the varible
         if WAstar_dynamic_variable.get():
             algorithms += "WAstar_dynamic,"
         if WAstar_static_variable.get():
@@ -404,8 +411,8 @@ if __name__ == "__main__":
 
     # hardcoded starting states
     # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
-    state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
+    state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
+    # state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
     scene_width = HORIZONTAL_OFFSET + 2 * len(state) * FIELD_SIZE + PUZZLE_DIST
