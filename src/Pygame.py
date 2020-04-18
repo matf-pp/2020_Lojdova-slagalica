@@ -391,7 +391,22 @@ def show_user_menu():
             puzzle_data["size"] = 3
         elif tk_var_puzzle_size.get() == 4:
             puzzle_data["size"] = 4
-            puzzle_size = 4
+        else:
+            popup = Tk()
+            popup.wm_title("!")
+
+            tk_lbl_condition = Label(popup,
+                                     text="Select puzzle size",
+                                     padx=PADDING_X,
+                                     pady=PADDING_Y)
+            tk_lbl_condition.pack(side="top", anchor="center")
+            tk_btn_okay = Button(popup,
+                                 text="OK",
+                                 command=popup.destroy,
+                                 padx=PADDING_X)
+            tk_btn_okay.pack()
+
+            popup.mainloop()
 
         if len(solvers) != 2:
             popup = Tk()
