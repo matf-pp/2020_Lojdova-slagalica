@@ -386,6 +386,23 @@ def show_user_menu():
             solvers.append(Solvers.ASTAR)
         puzzle_data["solvers"] = solvers
 
+        if len(solvers) != 2:
+            popup = Tk()
+            popup.wm_title("!")
+
+            tk_lbl_condition = Label(popup,
+                                     text="Select 2 algorithms",
+                                     padx=PADDING_X,
+                                     pady=PADDING_Y)
+            tk_lbl_condition.pack(side="top", anchor="center")
+            tk_btn_okay = Button(popup,
+                                 text="OK",
+                                 command=popup.destroy,
+                                 padx=PADDING_X)
+            tk_btn_okay.pack()
+
+            popup.mainloop()
+
         # get size of puzzle that user wants to use
         if tk_var_puzzle_size.get() == 3:
             puzzle_data["size"] = 3
@@ -407,24 +424,9 @@ def show_user_menu():
             tk_btn_okay.pack()
 
             popup.mainloop()
-
-        if len(solvers) != 2:
-            popup = Tk()
-            popup.wm_title("!")
-
-            tk_lbl_condition = Label(popup,
-                                     text="Select 2 algorithms",
-                                     padx=PADDING_X,
-                                     pady=PADDING_Y)
-            tk_lbl_condition.pack(side="top", anchor="center")
-            tk_btn_okay = Button(popup,
-                                 text="OK",
-                                 command=popup.destroy,
-                                 padx=PADDING_X)
-            tk_btn_okay.pack()
-
-            popup.mainloop()
-        else:
+        
+        # if everything is selected, we close user window
+        if len(solvers) == 2 and tk_var_puzzle_size.get() != 0:
             root.destroy()
 
     # tkinter window init
