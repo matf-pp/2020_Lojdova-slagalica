@@ -25,9 +25,9 @@ from tkinter import *
 FONT_COLOR = (31, 33, 43)
 SCENE_FONT_SIZE = 24
 USER_MENU_FONT_SIZE = 14
-USER_MENU_WIDTH, USER_MENU_HEIGHT = 400, 300
 FONT = "Courier"
 
+# user menu related
 PADDING_X = 40
 PADDING_Y = 5
 
@@ -42,7 +42,7 @@ ANIMATION_FIELD_SPEED = 2
 BACKGROUND_COLOR = (255, 255, 255)
 
 # puzzle related
-PUZZLE_IMAGES_PATH = os.path.join(".", "src", "Numbers")
+IMAGES_PATH = os.path.join(".", "src", "images")
 PUZZLE_IMAGES_EXT = ".png"
 PUZZLE_DIST = 25
 FIELD_SIZE = 100
@@ -73,31 +73,31 @@ class ProcessSolver(multiprocessing.Process):
         self._queue.put(puzzle)
 
 
-class Algorithms:
+class Solvers:
     r"""Enum class for algorithms."""
 
     ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
 
     @staticmethod
-    def get_algorithm_name(idx):
-        if idx == Algorithms.ASTAR:
+    def get_solver_name(idx):
+        if idx == Solvers.ASTAR:
             return "A*"
-        elif idx == Algorithms.IDASTAR:
+        elif idx == Solvers.IDASTAR:
             return "IDA*"
-        elif idx == Algorithms.WASTAR_D:
+        elif idx == Solvers.WASTAR_D:
             return "Dynamic WA*"
-        elif idx == Algorithms.WASTAR_S:
+        elif idx == Solvers.WASTAR_S:
             return "Static WA*"
 
     @staticmethod
-    def get_algorithm(idx):
-        if idx == Algorithms.ASTAR:
+    def get_solver_instance(idx):
+        if idx == Solvers.ASTAR:
             return Astar
-        elif idx == Algorithms.IDASTAR:
+        elif idx == Solvers.IDASTAR:
             return IDAstar
-        elif idx == Algorithms.WASTAR_D:
+        elif idx == Solvers.WASTAR_D:
             return partial(WAstar, weight=4, mode="dynamic")
-        elif idx == Algorithms.WASTAR_S:
+        elif idx == Solvers.WASTAR_S:
             return partial(WAstar, weight=4, mode="static")
 
 
@@ -194,7 +194,7 @@ def move_field(current_state, zero_field, exchange_field, target,
                         exchange_field._y += (-sign)
                     else:
                         exchange_field._x += (-sign)
-                    img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+                    img = pygame.image.load(os.path.join(IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
 
                     pygame.draw.rect(screen,
@@ -204,7 +204,7 @@ def move_field(current_state, zero_field, exchange_field, target,
 
                     screen.blit(img, (exchange_field._x, exchange_field._y))
                 else:
-                    img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+                    img = pygame.image.load(os.path.join(IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
                     screen.blit(img, (field_x, field_y))
     else:
@@ -226,11 +226,11 @@ def move_field(current_state, zero_field, exchange_field, target,
                         exchange_field._y += (-sign)
                     else:
                         exchange_field._x += (-sign)
-                    img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+                    img = pygame.image.load(os.path.join(IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
                     screen.blit(img, (exchange_field._x, exchange_field._y))
                 else:
-                    img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+                    img = pygame.image.load(os.path.join(IMAGES_PATH,
                                             str(value) + PUZZLE_IMAGES_EXT))
                     screen.blit(img, (field_x, field_y))
 
@@ -249,13 +249,13 @@ def draw_puzzle(current_state, puzzle_solvability):
         if value == 0:
             continue
 
-        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH,
+        img = pygame.image.load(os.path.join(IMAGES_PATH,
                                              str(value) + PUZZLE_IMAGES_EXT))
         screen.blit(img, (field_x, field_y))
 
     # when puzzle doesn't have solution
     if not puzzle_solvability:
-        img = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "stop.png"))
+        img = pygame.image.load(os.path.join(IMAGES_PATH, "stop.png"))
         img_width, img_height = img.get_size()
         screen.blit(img, (scene_width // 2 - img_width // 2,
                           scene_height // 2 - img_height // 2))
@@ -273,25 +273,27 @@ def solve_puzzle(puzzle, puzzle_solvability):
     draw_puzzle(current_state, puzzle_solvability)
 
     # get difference between current and next state
-    # In new puzzle state we will have value1 in field with index1
-    # and value2 in field with index2
+    # in new puzzle state we will have value_cur in field with index_cur
+    # and value_next in field with index_next
     if puzzle.next_puzzle_state() is not None:
-        index1, value1, index2, value2 = puzzle.states_difference(
-            puzzle.current_puzzle_state(),
-            puzzle.next_puzzle_state())
+        index_cur, value_cur, index_next, value_next = \
+            puzzle.states_difference(
+                puzzle.current_puzzle_state(),
+                puzzle.next_puzzle_state())
     else:
         return False  # no further moves
 
     # define direction of field movement
     move_direction = define_move_direction(puzzle.get_puzzle_size(),
-                                           index1,
-                                           index2,
-                                           value1,
-                                           value2)
+                                           index_cur,
+                                           index_next,
+                                           value_cur,
+                                           value_next)
 
     # get fields for animation
     exchange_field, zero_field = \
-        get_zero_and_exchange_field(index1, index2, value1, current_state)
+        get_zero_and_exchange_field(index_cur, index_next,
+                                    value_cur, current_state)
 
     # define stop targets for animation
     target_x, target_y = exchange_field._x, exchange_field._y
@@ -318,7 +320,7 @@ def solve_puzzle(puzzle, puzzle_solvability):
     return True  # valid move has happened
 
 
-def init_scene(scene_width, scene_height):
+def show_scene(scene_width, scene_height):
     r"""Initializing scene and returning Pygame's `Surface` object. Scene
     contains:
         (1) text boxes -- done here
@@ -335,7 +337,7 @@ def init_scene(scene_width, scene_height):
     screen = pygame.display.set_mode((scene_width, scene_height))
     pygame.display.set_caption("Loyd Puzzle A* Solvers")
 
-    icon = pygame.image.load(os.path.join(PUZZLE_IMAGES_PATH, "puzzle.png"))
+    icon = pygame.image.load(os.path.join(IMAGES_PATH, "icon.png"))
     pygame.display.set_icon(icon)
     screen.fill(BACKGROUND_COLOR)
 
@@ -345,7 +347,7 @@ def init_scene(scene_width, scene_height):
     # font = pygame.font.Font("./src/fonts/XpressiveBlack Regular.ttf", SCENE_FONT_SIZE)  # test font 4
     # font = pygame.font.Font("./src/fonts/Yes_Union.ttf", SCENE_FONT_SIZE)  # test font 5
     font = pygame.font.Font("./src/fonts/y.n.w.u.a.y.ttf", SCENE_FONT_SIZE)  # test font 6
-    text_upper_left = font.render(Algorithms.get_algorithm_name(puzzle_data.algorithms[0]),
+    text_upper_left = font.render(Solvers.get_solver_name(puzzle_data.solvers[0]),
                                   True,
                                   FONT_COLOR,
                                   BACKGROUND_COLOR)
@@ -354,7 +356,7 @@ def init_scene(scene_width, scene_height):
                                   TOP_OFFSET + (len(state)) * FIELD_SIZE + SCENE_FONT_SIZE // 2)
     screen.blit(text_upper_left, textrect_upper_left)
 
-    text_upper_right = font.render(Algorithms.get_algorithm_name(puzzle_data.algorithms[1]),
+    text_upper_right = font.render(Solvers.get_solver_name(puzzle_data.solvers[1]),
                                    True,
                                    FONT_COLOR,
                                    BACKGROUND_COLOR)
@@ -366,23 +368,23 @@ def init_scene(scene_width, scene_height):
     return screen
 
 
-def user_menu():
+def show_user_menu():
     r"""function draws basic tkinter window that allows user to select
     which algorithms dose he wants to compare"""
 
     puzzle_data = dict()
 
-    def get_algorithms():
-        algorithms = []
+    def parse_solvers():
+        solvers = []
         if tk_var_wastar_dynamic.get():
-            algorithms.append(Algorithms.WASTAR_D)
+            solvers.append(Solvers.WASTAR_D)
         if tk_var_wastar_static.get():
-            algorithms.append(Algorithms.WASTAR_S)
+            solvers.append(Solvers.WASTAR_S)
         if tk_var_idastar.get():
-            algorithms.append(Algorithms.IDASTAR)
+            solvers.append(Solvers.IDASTAR)
         if tk_var_astar.get():
-            algorithms.append(Algorithms.ASTAR)
-        puzzle_data["algorithms"] = algorithms
+            solvers.append(Solvers.ASTAR)
+        puzzle_data["solvers"] = solvers
 
         # get size of puzzle that user wants to use
         if tk_var_puzzle_size.get() == 3:
@@ -391,7 +393,7 @@ def user_menu():
             puzzle_data["size"] = 4
             puzzle_size = 4
 
-        if len(algorithms) != 2:
+        if len(solvers) != 2:
             popup = Tk()
             popup.wm_title("!")
 
@@ -412,6 +414,10 @@ def user_menu():
 
     # tkinter window init
     root = Tk()
+    root.wm_title("Loyd Puzzle A* Solvers")
+    root.iconphoto(True,
+                   PhotoImage(file=os.path.join(IMAGES_PATH, "icon.png")))
+    root.resizable(False, False)
     root.config(background="white")
 
     tk_frame_btn = Frame(root)
@@ -487,7 +493,7 @@ def user_menu():
     # creating submit button
     tk_btn_submit = Button(tk_frame_btn,
                            text="Submit",
-                           command=get_algorithms)
+                           command=parse_solvers)
     tk_btn_submit.pack(side=TOP, anchor=CENTER)
 
     # active tkinter main loop
@@ -508,19 +514,14 @@ def generate_state(N):
 
 
 if __name__ == "__main__":
-
     # variable algorithms contains all algorithms that user wants to compare
     algorithms = []
     puzzle_size = 0
 
     # call of user window
-    puzzle_data = user_menu()
+    puzzle_data = show_user_menu()
 
-    # hardcoded starting states
-    # state = [[8, 5, 9, 11], [7, 12, 10, 4], [0, 15, 13, 14], [1, 2, 6, 3]]
-    # state = [[7, 1, 2], [0, 8, 3], [6, 4, 5]]
-    # state = [[1, 2, 3], [0, 4, 5], [6, 8, 7]]  # Impossible to solve
-
+    # generating puzzle's initial state
     state = generate_state(puzzle_data.size)
 
     # TODO: numer 2 is hardcoded because there are exactly 2 puzzles
@@ -529,23 +530,13 @@ if __name__ == "__main__":
 
     puzzle_solvability = is_solvable(state)
 
-    screen = init_scene(scene_width, scene_height)
-
-    # necessary arguments for each process
-    # multiprocessing_data = [
-    #     (WAstar(len(state), 4, mode="dynamic"),
-    #      state,
-    #      LEFT_OFFSET, TOP_OFFSET),
-    #     (WAstar(len(state), 4, mode="static"),
-    #      state,
-    #      LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
-    # ]
+    screen = show_scene(scene_width, scene_height)
 
     multiprocessing_data = [
-        (Algorithms.get_algorithm(puzzle_data.algorithms[0])(len(state)),
+        (Solvers.get_solver_instance(puzzle_data.solvers[0])(len(state)),
          state,
          LEFT_OFFSET, TOP_OFFSET),
-        (Algorithms.get_algorithm(puzzle_data.algorithms[1])(len(state)),
+        (Solvers.get_solver_instance(puzzle_data.solvers[1])(len(state)),
          state,
          LEFT_OFFSET + len(state) * FIELD_SIZE + PUZZLE_DIST, TOP_OFFSET)
     ]
