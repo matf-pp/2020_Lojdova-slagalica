@@ -372,9 +372,10 @@ def show_user_menu():
     r"""function draws basic tkinter window that allows user to select
     which algorithms dose he wants to compare"""
 
-    puzzle_data = dict()
-
     def parse_solvers():
+        parse_solvers.is_destroyed = False
+        parse_solvers.puzzle_data = dict()
+
         solvers = []
         if tk_var_wastar_dynamic.get():
             solvers.append(Solvers.WASTAR_D)
@@ -384,7 +385,7 @@ def show_user_menu():
             solvers.append(Solvers.IDASTAR)
         if tk_var_astar.get():
             solvers.append(Solvers.ASTAR)
-        puzzle_data["solvers"] = solvers
+        parse_solvers.puzzle_data["solvers"] = solvers
 
         if len(solvers) != 2:
             popup = Tk()
@@ -405,9 +406,9 @@ def show_user_menu():
 
         # get size of puzzle that user wants to use
         if tk_var_puzzle_size.get() == 3:
-            puzzle_data["size"] = 3
+            parse_solvers.puzzle_data["size"] = 3
         elif tk_var_puzzle_size.get() == 4:
-            puzzle_data["size"] = 4
+            parse_solvers.puzzle_data["size"] = 4
         else:
             popup = Tk()
             popup.wm_title("!")
@@ -424,10 +425,12 @@ def show_user_menu():
             tk_btn_okay.pack()
 
             popup.mainloop()
-        
+
         # if everything is selected, we close user window
-        if len(solvers) == 2 and tk_var_puzzle_size.get() != 0:
-            root.destroy()
+        if len(solvers) == 2 and parse_solvers.puzzle_data.get("size") is not None:
+            if not parse_solvers.is_destroyed:
+                parse_solvers.is_destroyed = True
+                root.destroy()
 
     # tkinter window init
     root = Tk()
@@ -454,57 +457,49 @@ def show_user_menu():
     tk_var_puzzle_size = IntVar()
 
     # creating checkboxes
+    cb_shared_params = {
+        "onvalue": True,
+        "offvalue": False,
+        "padx": PADDING_X,
+        "pady": PADDING_Y
+    }
     tk_cb_wastar_dynamic = Checkbutton(tk_frame_cb,
                                        text="Dynamic weighted A*",
                                        variable=tk_var_wastar_dynamic,
-                                       onvalue=True,
-                                       offvalue=False,
-                                       padx=PADDING_X,
-                                       pady=PADDING_Y)
+                                       **cb_shared_params)
     tk_cb_wastar_dynamic.pack(side=TOP, anchor=W)
-
     tk_cb_wastar_static = Checkbutton(tk_frame_cb,
                                       text="Static weighted A*",
                                       variable=tk_var_wastar_static,
-                                      onvalue=True,
-                                      offvalue=False,
-                                      padx=PADDING_X,
-                                      pady=PADDING_Y)
+                                      **cb_shared_params)
     tk_cb_wastar_static.pack(side=TOP, anchor=W)
-
     tk_cb_idastar = Checkbutton(tk_frame_cb,
                                 text="Iterative deepening A*",
                                 variable=tk_var_idastar,
-                                onvalue=True,
-                                offvalue=False,
-                                padx=PADDING_X,
-                                pady=PADDING_Y)
+                                **cb_shared_params)
     tk_cb_idastar.pack(side=TOP, anchor=W)
-
     tk_cb_astar = Checkbutton(tk_frame_cb,
                               text="Standard A*",
                               variable=tk_var_astar,
-                              onvalue=True,
-                              offvalue=False,
-                              padx=PADDING_X,
-                              pady=PADDING_Y)
+                              **cb_shared_params)
     tk_cb_astar.pack(side=TOP, anchor=W)
 
     # creating radiobuttons
+    rb_shared_params = {
+        "padx": PADDING_X,
+        "pady": PADDING_Y
+    }
     tk_rb_3x3 = Radiobutton(tk_frame_rb,
                             text="3x3",
                             variable=tk_var_puzzle_size,
                             value=3,
-                            padx=PADDING_X,
-                            pady=PADDING_Y)
+                            **rb_shared_params)
     tk_rb_3x3.pack(side=TOP, anchor=W)
-
     tk_rb_4x4 = Radiobutton(tk_frame_rb,
                             text="4x4",
                             variable=tk_var_puzzle_size,
                             value=4,
-                            padx=PADDING_X,
-                            pady=PADDING_Y)
+                            **rb_shared_params)
     tk_rb_4x4.pack(side=TOP, anchor=W)
 
     # creating submit button
@@ -516,7 +511,7 @@ def show_user_menu():
     # active tkinter main loop
     root.mainloop()
 
-    return Namespace(**puzzle_data)
+    return Namespace(**parse_solvers.puzzle_data)
 
 
 def generate_state(N):
