@@ -4,10 +4,8 @@ import os
 
 import numpy as np
 
-from BaseSolver import BaseSolver
-
-sys.path.extend([os.path.join(os.getcwd(), "utils")])
-from utils import reconstruct_path, serialize, is_solvable, h
+from src.BaseSolver import BaseSolver
+from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class IDAstar(BaseSolver):

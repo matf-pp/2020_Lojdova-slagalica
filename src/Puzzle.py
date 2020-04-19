@@ -1,4 +1,4 @@
-from Field import Field
+from src.Field import Field
 
 
 class Puzzle:

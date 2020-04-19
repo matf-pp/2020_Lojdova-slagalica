@@ -1,6 +1,21 @@
+import time
+
 import numpy as np
 
 from permutation import Permutation
+
+
+def generate_state(N):
+    r"""Generate random state and determine if it's solvable."""
+
+    state = np.arange(N * N)
+
+    timestamp = int(time.time())
+    np.random.seed(timestamp)
+    np.random.shuffle(state)
+    state = state.reshape((N, N)).tolist()
+
+    return state, is_solvable(state)
 
 
 def reconstruct_path(parent, state):

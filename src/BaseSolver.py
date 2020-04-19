@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 
-sys.path.extend([os.path.join(os.getcwd(), "utils")])
-from utils import serialize, deserialize
+# sys.path.extend([os.path.join(os.getcwd(), "utils")])
+from utils.utils import serialize, deserialize
 
 
 class BaseSolver:

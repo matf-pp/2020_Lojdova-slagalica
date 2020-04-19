@@ -4,10 +4,10 @@ import os
 
 import numpy as np
 
-from BaseSolver import BaseSolver
+from src.BaseSolver import BaseSolver
 
-sys.path.extend([os.path.join(os.getcwd(), "utils")])
-from utils import reconstruct_path, serialize, is_solvable, h
+# sys.path.extend([os.path.join(os.getcwd(), "utils")])
+from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class Astar(BaseSolver):
