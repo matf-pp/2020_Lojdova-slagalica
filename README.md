@@ -16,7 +16,7 @@ $ run main.py
 ```
 
 
-:heavy_exclamation_mark: Alternativno, aplikacija se može instalirati i pokrenuti na sledeći način(neophodno je posedovati instaliran program **anaconda**):
+:heavy_exclamation_mark: Alternativno, po preuzimanju(kloniranju), aplikacija se može instalirati i pokrenuti na sledeći način(neophodno je posedovati instaliran program **anaconda**):
 ```sh
 $ conda env create -f enviroment.yml
 $ conda activate loydpuzzle
