@@ -4,9 +4,7 @@ import os
 
 import numpy as np
 
-from src.BaseSolver import BaseSolver
-
-# sys.path.extend([os.path.join(os.getcwd(), "utils")])
+from .BaseSolver import BaseSolver
 from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 

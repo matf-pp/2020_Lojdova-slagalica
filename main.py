@@ -4,13 +4,13 @@ import pygame
 import sys
 import os
 
+from tkinter import *
 from argparse import Namespace
 from functools import partial
 
 # external modules
 import numpy as np
 
-from tkinter import *
 from src.Astar import Astar
 from src.IDAstar import IDAstar
 from src.WAstar import WAstar

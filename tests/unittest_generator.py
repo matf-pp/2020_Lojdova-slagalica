@@ -5,8 +5,6 @@ import os
 
 import numpy as np
 
-sys.path.extend([os.path.join(os.getcwd(), "utils")])
-from utils import is_solvable
 
 """Generator of unit-tests. It's reproducible in case seed is known. All tests
 and seed are dumped in the `txt` file."""
@@ -27,14 +25,11 @@ if __name__ == "__main__":
     seed = args.seed
     np.random.seed(seed)
 
-    f_name = "tests_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"  # no overwrite conflicts
+    f_name = "tests_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     with open(f_name, "w") as f:
         print(seed, file=f)
         state = np.arange(N * N)
 
         for test_id in range(n_tests):
             np.random.shuffle(state)
-            while not is_solvable(state.reshape((N, N))):
-                np.random.shuffle(state)
-
             print(state.reshape((N, N)).tolist(), file=f)

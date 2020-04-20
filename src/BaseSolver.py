@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 
-# sys.path.extend([os.path.join(os.getcwd(), "utils")])
 from utils.utils import serialize, deserialize
 
 
@@ -51,7 +50,8 @@ class BaseSolver:
         elif isinstance(state, list):
             state = np.array(state)
 
-        br, bc = np.squeeze(np.argwhere(state == 0))  # there is only one blank tile
+        # there is only one blank tile
+        br, bc = np.squeeze(np.argwhere(state == 0))
 
         # shuffling all possible moves
         moves = [(br + 1, bc), (br - 1, bc), (br, bc + 1), (br, bc - 1)]
