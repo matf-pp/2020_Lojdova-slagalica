@@ -284,13 +284,16 @@ class UserMenu():
 
 class PuzzleManipulation:
 
-    r"""Abstract class for puzzle manipulation. Should not be initialized."""
+    r"""
+    Abstract class for puzzle manipulation. Should not be initialized.
+    """
 
     @staticmethod
     def get_zero_and_exchange_field(exchange_index, zero_index, value,
                                     current_state):
-        r"""Finding indices of exchange and empty (zero) fields.
-        
+        r"""
+        Finding indices of exchange and empty (zero) fields.
+
         Function defines which index corresponds to exchange and which
         corresponds to empty (zero) field.
 
@@ -299,7 +302,8 @@ class PuzzleManipulation:
         index.
 
         In other case exchange field is at the first and zero field at the
-        second index position."""
+        second index position.
+        """
 
         if value != 0:
             exchange_index, zero_index = zero_index, exchange_index
@@ -309,7 +313,8 @@ class PuzzleManipulation:
     @staticmethod
     def define_move_direction(puzzle_size, index_src, value_src,
                               index_dest, value_dest):
-        r"""Definens in which direction empty field of puzzle should be moved.
+        r"""
+        Definens in which direction empty field of puzzle should be moved.
 
         If the difference between source and destinantion fields(in our case
         empty and exchage fields) is equal to puzzle size then our fields are
@@ -319,7 +324,8 @@ class PuzzleManipulation:
         if they stands side by side).
 
         With all of these we can define position of the empty field relative
-        to exchange field."""
+        to exchange field.
+        """
 
         if_cond = value_src == 0 and index_src < index_dest
         if_cond = if_cond or (value_dest == 0 and index_dest < index_src)
@@ -331,11 +337,14 @@ class PuzzleManipulation:
 
 
 class MainScene():
-
-    r"""Wrapper class for Pygame main scene."""
+    r"""
+    Wrapper class for Pygame main scene.
+    """
 
     def __init__(self, state, puzzle_data, num_puzzles=2):
-        r"""MainScene constructor"""
+        r"""
+        Main Scene constructor
+        """
         self._N = len(state)
         self._scene_width = HORIZONTAL_OFFSET + \
             num_puzzles * self._N * FIELD_SIZE + PUZZLE_DIST
@@ -347,7 +356,8 @@ class MainScene():
 
     def _move_field(self, current_state, zero_field, exchange_field, target,
                     move_direction, puzzle_x, puzzle_y):
-        r"""Function determines direction in which empty field is seted to be moved.
+        r"""
+        Function determines direction in which empty field is seted to be moved.
 
         Then, function swaps fields by increasing/decresaing coordinates
         of either empty and exchange field. If the move direction is up or down
@@ -363,7 +373,8 @@ class MainScene():
         When we define target coordinate, its value and direction of move,
         main loop of this function changes both coordinates of empty and
         exchange field by increasing/decreasing them for the value of sign
-        variable."""
+        variable.
+        """
 
         if move_direction == Direction.UP:
             zero_field_variable = zero_field._y
@@ -461,12 +472,14 @@ class MainScene():
         self._screen.blit(text_right, textrect_right)
 
     def _draw_puzzle(self, current_state, puzzle_solvability):
-        r"""Function iterates through current state of the puzzle.
+        r"""
+        Function iterates through current state of the puzzle.
 
         Draws all fields as a images.
 
         In the place of empty(zero) field nothing should be draw so we
-        skip the field with value 0."""
+        skip the field with value 0.
+        """
 
         for field in current_state:
             value = field._value
@@ -487,9 +500,11 @@ class MainScene():
                                     self._scene_height // 2 - img_height // 2))
 
     def solve_puzzle(self, puzzle, puzzle_solvability):
-        r"""Function gets current state of puzzle, draws puzzle, gets
+        r"""
+        Function gets current state of puzzle, draws puzzle, gets
         difference between current and the next state of the puzzle, and makes
-        transition from current to the next state."""
+        transition from current to the next state.
+        """
 
         current_state = puzzle._fields
         puzzle_x, puzzle_y = puzzle.get_puzzle_coordinates()
@@ -554,7 +569,8 @@ class MainScene():
         self._screen.fill(BACKGROUND_COLOR)
 
     def show(self):
-        r"""Initializing scene and returning Pygame's `Surface` object. Scene
+        r"""
+        Initializing scene and returning Pygame's `Surface` object. Scene
         contains:
             (1) text boxes -- done here
             (2) proper background color -- done here
@@ -565,7 +581,8 @@ class MainScene():
             pixels.
 
         Returns:
-            screen (Surface): Object for scene manipulation."""
+            screen (Surface): Object for scene manipulation.
+        """
 
         pygame.init()
         self._screen = pygame.display.set_mode((self._scene_width,
