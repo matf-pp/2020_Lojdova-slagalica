@@ -6,17 +6,21 @@ from utils.utils import serialize, deserialize
 
 
 class BaseSolver:
-    r"""Base class for Loyd puzzle solver. It doesn't implement any algorithm
+    r"""Base class for Loyd puzzle solver.
+
+    It doesn't implement any algorithm
     and it's expected that any of such extends this class. It provides general
     and useful functions for easier implementation of algorithms."""
 
     def __init__(self, N):
-        r"""Initializing puzzle.
+        r"""
+        Initializing puzzle.
 
         It's assumed that final position has blank tile in upper-left corner.
 
         Arguments:
-            start_state (list): Starting state."""
+            start_state (list): Starting state.
+        """
 
         self._N = N
         self._N2 = N * N
@@ -25,24 +29,26 @@ class BaseSolver:
         self._end_state = serialize(end_state)
 
     def _get_neighbors(self, state):
-        r"""Returns all states that can be directly obtained from the given
-        state.
+        r"""
+        Returns all states that can be directly obtained from the given state.
 
         These states are randomly shuffled before returned along with proper
         (unit) weights.
 
         Arguments:
             state (str, list or np.ndarray): Given state.
-
         Returns:
-            iterable (zip): Tuples of states and weights."""
+            iterable (zip): Tuples of states and weights.
+        """
 
         def _is_valid(r, c):
-            r"""Helper function for veryfing valid moves.
+            r"""
+            Helper function for veryfing valid moves.
 
             Arguments:
                 r (int) Row of blank tile.
-                c (int): Column of blank tile."""
+                c (int): Column of blank tile.
+            """
 
             return r >= 0 and c >= 0 and r < self._N and c < self._N
 

@@ -41,16 +41,12 @@ FIELD_SIZE = 100
 
 
 class Direction:
-
     r"""Enum class for all possible directions of field movement."""
-
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
 class Solvers:
-
     r"""Enum class for all available solvers."""
-
     ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
 
     @staticmethod
@@ -78,17 +74,19 @@ class Solvers:
 
 class ProcessSolver(multiprocessing.Process):
     r"""Processes are used for solving puzzles.
-    
+
     Each is runned as daemon
     process and saves data on shared queue."""
 
     def __init__(self, solver, queue, args=None):
-        r"""Base constructor.
+        r"""
+        Base constructor.
 
         Arguments:
             solver (BaseSolver): Puzzle solver.
-            queue (Queue): ...
-            args (dict): ... """
+            queue (Queue): Queue for placing results for each process.
+            args (dict): Arguments that are passed to processes.
+        """
 
         super().__init__(daemon=True, args=args)
 

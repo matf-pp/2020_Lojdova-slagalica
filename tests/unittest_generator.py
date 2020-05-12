@@ -1,13 +1,10 @@
 import argparse
 import time
-import sys
-import os
 
 import numpy as np
 
 
-"""Generator of unit-tests. It's reproducible in case seed is known. All tests
-and seed are dumped in the `txt` file."""
+r"""Generator of unit-tests. It's reproducible in case seed is known."""
 
 
 if __name__ == "__main__":
