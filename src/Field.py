@@ -12,10 +12,8 @@ class Field:
 
     def change_value(self, new_value):
         r"""Setter."""
-
         self._value = new_value
 
     def current_value(self):
         r"""Getter."""
-
         return (self._value, self._x, self._y)
