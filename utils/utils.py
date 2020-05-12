@@ -18,13 +18,15 @@ def generate_state(N):
 
 
 def reconstruct_path(parent, state):
-    r"""Reconstructs the shortest path in the search tree.
+    r"""
+    Reconstructs the shortest path in the search tree.
 
     It's assumed that starting node have `None` as a parent.
 
     Arguments:
         parent (dict): Dictionary of parents for each node.
-        state (str): Hash of the terminating state."""
+        state (str): Hash of the terminating state.
+    """
 
     path = [state]
 
@@ -36,12 +38,14 @@ def reconstruct_path(parent, state):
 
 
 def deserialize(hash_val):
-    r"""Deserialization of the given string.
+    r"""
+    Deserialization of the given string.
 
     Arguments:
         hash_val (str): Serialized state.
     Returns:
-        state (np.ndarray): Deserialized state."""
+        state (np.ndarray): Deserialized state.
+    """
 
     state = hash_val.split(':')
     state = [int(x) for x in state]
@@ -51,14 +55,16 @@ def deserialize(hash_val):
 
 
 def h(state):
-    r"""Calculates Manhattan distance between given state and final state.
+    r"""
+    Calculates Manhattan distance between given state and final state.
 
     Used as a heuristics for A* variants.
 
     Arguments:
         state (str, np.ndarray or list): Given state.
     Returns:
-        cost (int): Manhattan distance between goal and given state."""
+        cost (int): Manhattan distance between goal and given state.
+    """
 
     # state has to be either list of np.ndarray for further calculations
     if isinstance(state, str):
@@ -80,14 +86,16 @@ def h(state):
 
 
 def serialize(state):
-    r"""Serializing given state.
+    r"""
+    Serializing given state.
 
     It's basically 2D array flattening.
 
     Arguments:
         state (list or np.ndarray): Given state.
     Returns:
-        hash value (str): Serialized state."""
+        hash value (str): Serialized state.
+    """
 
     # flattening either 2D list or 2D np.ndarray
     if isinstance(state, list):
@@ -101,7 +109,8 @@ def serialize(state):
 
 
 def is_solvable(state):
-    r"""Determines if its given puzzle solvable.
+    r"""
+    Determines if its given puzzle solvable.
 
     It's done by calculating sign of sum of the state's permutation and
     Manhattan distance of empty cell. If aforementioned sum is odd there is no
@@ -111,7 +120,8 @@ def is_solvable(state):
         state (str, list or np.ndarray): Given state.
     Returns:
         flag (bool): True if it's possible to solve the puzzle and false
-            otherwise."""
+            otherwise.
+    """
 
     # np.ndarray is necessary for futher calculations
     if isinstance(state, str):
