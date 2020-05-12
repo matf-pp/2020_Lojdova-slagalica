@@ -4,6 +4,9 @@ import pygame
 import os
 
 from tkinter import *
+from tkinter import Tk, TOP, PhotoImage
+from tkinter import Label, Button, Frame, BooleanVar, IntVar
+from tkinter import Button, Checkbutton, Radiobutton
 from argparse import Namespace
 from functools import partial
 
@@ -41,14 +44,14 @@ FIELD_SIZE = 100
 
 
 class Direction:
-    r"""
+    """
     Enum class for all possible directions of field movement.
     """
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
 class Solvers:
-    r"""
+    """
     Enum class for all available solvers.
     """
     ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
@@ -77,7 +80,7 @@ class Solvers:
 
 
 class ProcessSolver(multiprocessing.Process):
-    r"""
+    """
     Processes are used for solving puzzles.
 
     Each is runned as daemon
@@ -85,7 +88,7 @@ class ProcessSolver(multiprocessing.Process):
     """
 
     def __init__(self, solver, queue, args=None):
-        r"""
+        """
         Base constructor.
 
         Arguments:
@@ -118,11 +121,11 @@ class ProcessSolver(multiprocessing.Process):
 
 
 class UserMenu():
-    r"""
+    """
     Wrapper class for tkinter user menu.
     """
     def _parse_solvers(self):
-        r"""
+        """
         Based on selected items fetch `solvers` and `puzzle_size`.
         """
 
@@ -187,7 +190,7 @@ class UserMenu():
                 self._root.destroy()
 
     def _setup_cb(self):
-        r"""Setup all checkboxes in the user menu."""
+        """Setup all checkboxes in the user menu."""
         cb_shared_params = {
             "onvalue": True,
             "offvalue": False,
@@ -220,7 +223,7 @@ class UserMenu():
         self._tk_cb_astar.pack(side=TOP, anchor=W)
 
     def _setup_rb(self):
-        r"""Setup all radio buttons in the user menu."""
+        """Setup all radio buttons in the user menu."""
         rb_shared_params = {
             "padx": PADDING_X,
             "pady": PADDING_Y
@@ -245,7 +248,7 @@ class UserMenu():
         self._tk_btn_submit.pack(side=TOP, anchor=CENTER)
 
     def __init__(self):
-        r"""Tkinter constructor."""
+        """Tkinter constructor."""
         self._root = Tk()
         self._root.wm_title("Loyd Puzzle A* Solvers")
 
@@ -284,14 +287,14 @@ class UserMenu():
 
 class PuzzleManipulation:
 
-    r"""
+    """
     Abstract class for puzzle manipulation. Should not be initialized.
     """
 
     @staticmethod
     def get_zero_and_exchange_field(exchange_index, zero_index, value,
                                     current_state):
-        r"""
+        """
         Finding indices of exchange and empty (zero) fields.
 
         Function defines which index corresponds to exchange and which
@@ -313,7 +316,7 @@ class PuzzleManipulation:
     @staticmethod
     def define_move_direction(puzzle_size, index_src, value_src,
                               index_dest, value_dest):
-        r"""
+        """
         Definens in which direction empty field of puzzle should be moved.
 
         If the difference between source and destinantion fields(in our case
@@ -337,12 +340,12 @@ class PuzzleManipulation:
 
 
 class MainScene():
-    r"""
+    """
     Wrapper class for Pygame main scene.
     """
 
     def __init__(self, state, puzzle_data, num_puzzles=2):
-        r"""
+        """
         Main Scene constructor
         """
         self._N = len(state)
@@ -356,7 +359,7 @@ class MainScene():
 
     def _move_field(self, current_state, zero_field, exchange_field, target,
                     move_direction, puzzle_x, puzzle_y):
-        r"""
+        """
         Function determines direction in which empty field is seted to be moved.
 
         Then, function swaps fields by increasing/decresaing coordinates
@@ -472,7 +475,7 @@ class MainScene():
         self._screen.blit(text_right, textrect_right)
 
     def _draw_puzzle(self, current_state, puzzle_solvability):
-        r"""
+        """
         Function iterates through current state of the puzzle.
 
         Draws all fields as a images.
@@ -500,7 +503,7 @@ class MainScene():
                                     self._scene_height // 2 - img_height // 2))
 
     def solve_puzzle(self, puzzle, puzzle_solvability):
-        r"""
+        """
         Function gets current state of puzzle, draws puzzle, gets
         difference between current and the next state of the puzzle, and makes
         transition from current to the next state.
@@ -569,7 +572,7 @@ class MainScene():
         self._screen.fill(BACKGROUND_COLOR)
 
     def show(self):
-        r"""
+        """
         Initializing scene and returning Pygame's `Surface` object. Scene
         contains:
             (1) text boxes -- done here
@@ -577,8 +580,8 @@ class MainScene():
             (3) puzzles -- done separately
 
         Arguments:
-            scene_width, scene_height (ints): Dimension of scene window in
-            pixels.
+            scene_width (int): Scene width in pixels.
+            scene_height (int): Scene height in pixels.
 
         Returns:
             screen (Surface): Object for scene manipulation.
