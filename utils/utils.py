@@ -40,7 +40,6 @@ def deserialize(hash_val):
 
     Arguments:
         hash_val (str): Serialized state.
-
     Returns:
         state (np.ndarray): Deserialized state."""
 
@@ -58,7 +57,6 @@ def h(state):
 
     Arguments:
         state (str, np.ndarray or list): Given state.
-
     Returns:
         cost (int): Manhattan distance between goal and given state."""
 
@@ -88,7 +86,6 @@ def serialize(state):
 
     Arguments:
         state (list or np.ndarray): Given state.
-
     Returns:
         hash value (str): Serialized state."""
 
@@ -112,7 +109,6 @@ def is_solvable(state):
 
     Arguments:
         state (str, list or np.ndarray): Given state.
-
     Returns:
         flag (bool): True if it's possible to solve the puzzle and false
             otherwise."""
