@@ -5,7 +5,7 @@ import os
 
 from tkinter import *
 from tkinter import Tk, TOP, PhotoImage
-from tkinter import Label, Button, Frame, BooleanVar, IntVar
+from tkinter import Label, Frame, BooleanVar, IntVar
 from tkinter import Button, Checkbutton, Radiobutton
 from argparse import Namespace
 from functools import partial
