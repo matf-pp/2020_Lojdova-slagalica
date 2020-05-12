@@ -1,24 +1,28 @@
 import heapq
-import sys
-import os
-
-import numpy as np
 
 from .BaseSolver import BaseSolver
 from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class Astar(BaseSolver):
+
     r"""Standard A* algorithm."""
 
     def __init__(self, N):
+        r"""Base constructor.
+
+        Arguments:
+            N (int): puzzle size."""
+
         super().__init__(N)
 
     def solve(self, start_state):
-        r"""Solving given puzzle. This implementation assumes that given
-        heurstics is consistent meaning that it's sufficient to relax distance
-        the moment it becomes possible and such action will never be possible
-        in the future. Manhattan distance is used.
+        r"""Solving given puzzle.
+
+        This implementation assumes that given heurstics is consistent meaning
+        that it's sufficient to relax distance the moment it becomes possible
+        and such action will never be possible in the future. Manhattan
+        distance is used.
 
         Arguments:
             start_state (list or np.ndarray): Starting state.

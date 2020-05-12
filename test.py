@@ -1,7 +1,5 @@
 import unittest
-import argparse
 import sys
-import os
 
 from src.Astar import Astar
 from src.WAstar import WAstar

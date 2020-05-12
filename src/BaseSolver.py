@@ -1,6 +1,4 @@
 import random
-import sys
-import os
 
 import numpy as np
 
@@ -13,8 +11,9 @@ class BaseSolver:
     and useful functions for easier implementation of algorithms."""
 
     def __init__(self, N):
-        r"""Initializing puzzle. It's assumed that final position has blank
-        tile in upper-left corner.
+        r"""Initializing puzzle.
+
+        It's assumed that final position has blank tile in upper-left corner.
 
         Arguments:
             start_state (list): Starting state."""
@@ -27,8 +26,10 @@ class BaseSolver:
 
     def _get_neighbors(self, state):
         r"""Returns all states that can be directly obtained from the given
-        state. These states are randomly shuffled before returned along with
-        proper (unit) weights.
+        state.
+
+        These states are randomly shuffled before returned along with proper
+        (unit) weights.
 
         Arguments:
             state (str, list or np.ndarray): Given state.
@@ -40,8 +41,9 @@ class BaseSolver:
             r"""Helper function for veryfing valid moves.
 
             Arguments:
-                r, c: Row and column of blank tile.
-            """
+                r (int) Row of blank tile.
+                c (int): Column of blank tile."""
+
             return r >= 0 and c >= 0 and r < self._N and c < self._N
 
         # state should be np.ndarray because of further calculations

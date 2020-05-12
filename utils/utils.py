@@ -6,6 +6,7 @@ from permutation import Permutation
 
 
 def generate_state(N):
+
     r"""Generate random state and determine if it's solvable."""
 
     state = np.arange(N * N)
@@ -19,13 +20,13 @@ def generate_state(N):
 
 
 def reconstruct_path(parent, state):
-    r"""Reconstructs the shortest path in the search tree. It's assumed that
-    starting node have `None` as a parent.
+    r"""Reconstructs the shortest path in the search tree.
+
+    It's assumed that starting node have `None` as a parent.
 
     Arguments:
         parent (dict): Dictionary of parents for each node.
-        state (str): Hash of the terminating state.
-    """
+        state (str): Hash of the terminating state."""
 
     path = [state]
 
@@ -53,8 +54,9 @@ def deserialize(hash_val):
 
 
 def h(state):
-    r"""Calculates Manhattan distance between given state and final state. Used
-    as a heuristics for A* variants.
+    r"""Calculates Manhattan distance between given state and final state.
+
+    Used as a heuristics for A* variants.
 
     Arguments:
         state (str, np.ndarray or list): Given state.
@@ -82,7 +84,9 @@ def h(state):
 
 
 def serialize(state):
-    r"""Serializing given state. It's basically 2D array flattening.
+    r"""Serializing given state.
+
+    It's basically 2D array flattening.
 
     Arguments:
         state (list or np.ndarray): Given state.
@@ -102,9 +106,11 @@ def serialize(state):
 
 
 def is_solvable(state):
-    r"""Determines if its given puzzle solvable. It's done by calculating sign
-    of sum of the state's permutation and Manhattan distance of empty cell. If
-    aforementioned sum is odd there is no solution.
+    r"""Determines if its given puzzle solvable.
+
+    It's done by calculating sign of sum of the state's permutation and
+    Manhattan distance of empty cell. If aforementioned sum is odd there is no
+    solution.
 
     Arguments:
         state (str, list or np.ndarray): Given state.

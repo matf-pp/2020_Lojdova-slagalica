@@ -3,9 +3,10 @@ import unittest
 
 
 class TestSolver3x3(unittest.TestCase):
-    r"""Unit-testing class for 3x3 puzzles. Unit tests are separated based on
-    difficulty. There are exactly 4 types i) not solvable ii) easy iii) medium
-    iv) hard."""
+    r"""Unit-testing class for 3x3 puzzles.
+
+    Unit tests are separated based on difficulty. There are exactly 4 types i)
+    not solvable ii) easy iii) medium iv) hard."""
 
     def setUp(self):
         self._solver_callback = sys.argv[1]

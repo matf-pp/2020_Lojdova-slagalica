@@ -1,19 +1,22 @@
 import heapq
-import sys
-import os
-
-import numpy as np
 
 from .BaseSolver import BaseSolver
 from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class IDAstar(BaseSolver):
-    r"""Iterative deepening A*. States will be explored in case their f score
-    isn't greater than the given threshold. Threshold will be properly updated
-    in order to reach the final state."""
+    r"""Iterative deepening A*.
+
+    States will be explored in case their f score isn't greater than the given
+    threshold. Threshold will be properly updated in order to reach the final
+    state."""
 
     def __init__(self, N):
+        r"""Base constructor.
+
+        Arguments:
+            N (int): puzzle size."""
+
         super().__init__(N)
 
     def _solve_threshold(self, start_state, threshold):
@@ -52,10 +55,12 @@ class IDAstar(BaseSolver):
         return False, (n_iters, next_threshold, None)
 
     def solve(self, start_state):
-        r"""Solving given puzzle. This implementation assumes that given
-        heurstics is consistent meaning that it's sufficient to relax distance
-        the moment it becomes possible and such action will never be possible
-        in the future. Manhattan distance is used.
+        r"""Solving given puzzle.
+
+        This implementation assumes that given heurstics is consistent meaning
+        that it's sufficient to relax distance the moment it becomes possible
+        and such action will never be possible in the future. Manhattan
+        distance is used.
 
         Arguments:
             start_state (list or np.ndarray): Starting state.
