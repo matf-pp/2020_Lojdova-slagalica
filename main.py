@@ -41,11 +41,13 @@ FIELD_SIZE = 100
 
 
 class Direction:
+
     r"""Enum class for all possible directions of field movement."""
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
 class Solvers:
+
     r"""Enum class for all available solvers."""
     ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
 
