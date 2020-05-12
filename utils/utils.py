@@ -6,9 +6,7 @@ from permutation import Permutation
 
 
 def generate_state(N):
-
     r"""Generate random state and determine if it's solvable."""
-
     state = np.arange(N * N)
 
     timestamp = int(time.time())
