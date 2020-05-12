@@ -119,8 +119,7 @@ def is_solvable(state):
     Arguments:
         state (str, list or np.ndarray): Given state.
     Returns:
-        flag (bool): True if it's possible to solve the puzzle and false
-            otherwise.
+        flag (bool): If it's possible to solve the puzzle.
     """
 
     # np.ndarray is necessary for futher calculations
