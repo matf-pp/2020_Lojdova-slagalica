@@ -28,6 +28,7 @@ class Astar(BaseSolver):
 
         Arguments:
             start_state (list or np.ndarray): Starting state.
+
         Returns:
             flag (bool): If it's to solve the puzzle.
             n_iters (int): Number of iterations.

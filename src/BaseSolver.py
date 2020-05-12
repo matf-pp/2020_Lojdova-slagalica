@@ -39,6 +39,7 @@ class BaseSolver:
 
         Arguments:
             state (str, list or np.ndarray): Given state.
+
         Returns:
             iterable (zip): Tuples of states and weights.
         """
