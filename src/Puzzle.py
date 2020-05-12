@@ -109,7 +109,7 @@ class Puzzle:
     def states_difference(self, current_st, next_st):
         """
         Calculates difference between two states.
-        
+
         Arguments:
             current_st (int): Current state index.
             next_st (int): Next state index.
