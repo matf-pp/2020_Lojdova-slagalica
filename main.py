@@ -1,21 +1,15 @@
 # standard modules
 import multiprocessing
 import pygame
-import sys
 import os
 
 from tkinter import *
 from argparse import Namespace
 from functools import partial
 
-# external modules
-import numpy as np
-
 from src.Astar import Astar
 from src.IDAstar import IDAstar
 from src.WAstar import WAstar
-from src.BaseSolver import BaseSolver
-from src.Field import Field
 from src.Puzzle import Puzzle
 from utils.utils import serialize, generate_state
 
@@ -47,12 +41,14 @@ FIELD_SIZE = 100
 
 
 class Direction:
+
     r"""Enum class for all possible directions of field movement."""
 
     UP, DOWN, LEFT, RIGHT = 1, 2, 3, 4
 
 
 class Solvers:
+
     r"""Enum class for all available solvers."""
 
     ASTAR, IDASTAR, WASTAR_S, WASTAR_D = 1, 2, 3, 4
@@ -81,10 +77,19 @@ class Solvers:
 
 
 class ProcessSolver(multiprocessing.Process):
-    r"""Processes are used for solving puzzles. Each is runned as daemon
+    r"""Processes are used for solving puzzles.
+    
+    Each is runned as daemon
     process and saves data on shared queue."""
 
     def __init__(self, solver, queue, args=None):
+        r"""Base constructor.
+
+        Arguments:
+            solver (BaseSolver): Puzzle solver.
+            queue (Queue): ...
+            args (dict): ... """
+
         super().__init__(daemon=True, args=args)
 
         self._solver = solver
@@ -109,8 +114,8 @@ class ProcessSolver(multiprocessing.Process):
 
 
 class UserMenu():
-    r"""Wrapper class for tkinter user menu."""
 
+    r"""Wrapper class for tkinter user menu."""
     def _parse_solvers(self):
         r"""Based on selected items fetch `solvers` and `puzzle_size`."""
 
@@ -176,7 +181,6 @@ class UserMenu():
 
     def _setup_cb(self):
         r"""Setup all checkboxes in the user menu."""
-
         cb_shared_params = {
             "onvalue": True,
             "offvalue": False,
@@ -210,7 +214,6 @@ class UserMenu():
 
     def _setup_rb(self):
         r"""Setup all radio buttons in the user menu."""
-
         rb_shared_params = {
             "padx": PADDING_X,
             "pady": PADDING_Y
@@ -235,6 +238,7 @@ class UserMenu():
         self._tk_btn_submit.pack(side=TOP, anchor=CENTER)
 
     def __init__(self):
+        r"""Tkinter constructor."""
         self._root = Tk()
         self._root.wm_title("Loyd Puzzle A* Solvers")
 
@@ -272,12 +276,15 @@ class UserMenu():
 
 
 class PuzzleManipulation:
+
     r"""Abstract class for puzzle manipulation. Should not be initialized."""
 
     @staticmethod
     def get_zero_and_exchange_field(exchange_index, zero_index, value,
                                     current_state):
-        r"""Function defines which index corresponds to exchange and which
+        r"""Finding indices of exchange and empty (zero) fields.
+        
+        Function defines which index corresponds to exchange and which
         corresponds to empty (zero) field.
 
         If the value of first field is zero, then zero field stands in position
@@ -317,9 +324,11 @@ class PuzzleManipulation:
 
 
 class MainScene():
+
     r"""Wrapper class for Pygame main scene."""
 
     def __init__(self, state, puzzle_data, num_puzzles=2):
+        r"""MainScene constructor"""
         self._N = len(state)
         self._scene_width = HORIZONTAL_OFFSET + \
             num_puzzles * self._N * FIELD_SIZE + PUZZLE_DIST
@@ -331,8 +340,7 @@ class MainScene():
 
     def _move_field(self, current_state, zero_field, exchange_field, target,
                     move_direction, puzzle_x, puzzle_y):
-        r"""At first, function determines direction in which empty field
-        is seted to be moved.
+        r"""Function determines direction in which empty field is seted to be moved.
 
         Then, function swaps fields by increasing/decresaing coordinates
         of either empty and exchange field. If the move direction is up or down
@@ -446,8 +454,9 @@ class MainScene():
         self._screen.blit(text_right, textrect_right)
 
     def _draw_puzzle(self, current_state, puzzle_solvability):
-        r"""Function iterates through current state of the puzzle
-        and draws all fields as a images.
+        r"""Function iterates through current state of the puzzle.
+
+        Draws all fields as a images.
 
         In the place of empty(zero) field nothing should be draw so we
         skip the field with value 0."""
