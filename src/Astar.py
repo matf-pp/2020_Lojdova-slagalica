@@ -6,18 +6,21 @@ from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 class Astar(BaseSolver):
 
-    r"""Standard A* algorithm."""
+    """Standard A* algorithm."""
 
     def __init__(self, N):
-        r"""Base constructor.
+        """
+        Base constructor.
 
         Arguments:
-            N (int): puzzle size."""
+            N (int): puzzle size.
+        """
 
         super().__init__(N)
 
     def solve(self, start_state):
-        r"""Solving given puzzle.
+        """
+        Solving given puzzle.
 
         This implementation assumes that given heurstics is consistent meaning
         that it's sufficient to relax distance the moment it becomes possible
@@ -29,7 +32,8 @@ class Astar(BaseSolver):
 
         Returns:
             flag, n_iters: Flag (True/False) if it's possible to solve the
-                puzzle and number of iterations in solving process."""
+                puzzle and number of iterations in solving process.
+        """
 
         self._start_state = serialize(start_state)
         n_iters = 0
