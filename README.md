@@ -8,9 +8,9 @@ Aplikacija _Lojdova slagalica_, bavi se rešavanjem poznatog problema čiji je c
 :hammer: ## Instalacija i pokretanje:
 Aplikaciju je moguće jednostavno instalirati pomoću sledećih komandi terimnala:
 ```sh
-$ git clone https://github.com/matf-pp/2020_Lojdova-slagalica.git
-$ cd 2020_Lojdova-slagalica
-$ pip install -r requirements.txt
+git clone https://github.com/matf-pp/2020_Lojdova-slagalica.git
+cd 2020_Lojdova-slagalica
+pip install -r requirements.txt
 ```
 Nakon preduzetih koraka, aplikacija će se klonirati sa gitHub-a, a sve neophodne biblioteke koje se nalaze u **requirements.txt** biće preuzete i instalirane. Kako bi se aplikacija pokrenula, neophodno je, u terminalu, zadati komandu
 ```sh
