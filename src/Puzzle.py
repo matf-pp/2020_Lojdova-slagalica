@@ -58,8 +58,8 @@ class Puzzle:
         return (self._x, self._y)
 
     def get_all_coordinates(self):
-        r"""Count fields coordinates realtive to puzzle coordinates and field
-        size."""
+        r"""Count fields coordinates realtive to
+         puzzle coordinates and field size."""
 
         coords_list = []
         field_size = self.get_field_size()
@@ -129,7 +129,6 @@ class Puzzle:
 
     def states_change(self):
         r"""Function only changes values of two fields."""
-
         if self.is_last_state():
             return None
         else:
