@@ -4,11 +4,12 @@ from .Field import Field
 class Puzzle:
 
     def __init__(self, list_of_states, x, y, size):
-        r"""
+        """
         Arguments:
             list_of_states (list): List of all puzzle states.
             x, y (int): Upper left point of puzzle.
-            size (int): Size of puzzle in pixels."""
+            size (int): Size of puzzle in pixels.
+        """
 
         self._list_of_states = list_of_states
         self._x, self._y = x, y
@@ -58,8 +59,8 @@ class Puzzle:
         return (self._x, self._y)
 
     def get_all_coordinates(self):
-        r"""Count fields coordinates realtive to
-         puzzle coordinates and field size."""
+        """Count fields coordinates realtive to puzzle coordinates and field
+        size."""
 
         coords_list = []
         field_size = self.get_field_size()
@@ -80,7 +81,8 @@ class Puzzle:
         return coords_list
 
     def initialize_fields(self):
-        r"""Schedule of fields in puzzle:
+        """
+        Schedule of fields in puzzle:
 
         [0]  [1]  [2]  [3]          [0]  [1]  [2]       [0]  [1]
         [4]  [5]  [6]  [7]          [3]  [4]  [5]       [2]  [3]
@@ -90,7 +92,8 @@ class Puzzle:
         Note: Field on position [3]
                     => It doesn't mean that field has value equals to number 3!
 
-        Field with value 0 is the field that is moving all the time."""
+        Field with value 0 is the field that is moving all the time.
+        """
 
         tmp_state = self.current_puzzle_state()
         coords_list = self.get_all_coordinates()
@@ -105,9 +108,11 @@ class Puzzle:
         return fields
 
     def states_difference(self, current_st, next_st):
-        r'''index1 and index2 are indexes of fields in list self._fields
-            that have changed between two puzzle states.
-            new_val1 and new_val2 are values of these fields.'''
+        """
+        index1 and index2 are indexes of fields in list self._fields that have
+        changed between two puzzle states. new_val1 and new_val2 are values of
+        these fields.
+        """
 
         for i in range(self._n):
             if current_st[i] != next_st[i]:
