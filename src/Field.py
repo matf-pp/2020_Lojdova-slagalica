@@ -5,7 +5,8 @@ class Field:
         Base constructor.
 
         Arguments:
-            x, y (int): Upper left point of field.
+            x (int): X coordinate of upper left corner of field.
+            y (int): Y coordinate of upper left corner of field.
             value (int): Value (number) in that field.
         """
 

@@ -59,8 +59,7 @@ class Puzzle:
         return (self._x, self._y)
 
     def get_all_coordinates(self):
-        """Count fields coordinates realtive to puzzle coordinates and field
-        size."""
+        """Count coordinates relative to puzzle coordinates and field size."""
 
         coords_list = []
         field_size = self.get_field_size()
@@ -109,9 +108,11 @@ class Puzzle:
 
     def states_difference(self, current_st, next_st):
         """
-        index1 and index2 are indexes of fields in list self._fields that have
-        changed between two puzzle states. new_val1 and new_val2 are values of
-        these fields.
+        Calculates difference between two states.
+        
+        Arguments:
+            current_st (int): Current state index.
+            next_st (int): Next state index.
         """
 
         for i in range(self._n):
