@@ -1,19 +1,22 @@
 import heapq
-import sys
-import os
-
-import numpy as np
 
 from .BaseSolver import BaseSolver
 from utils.utils import reconstruct_path, serialize, is_solvable, h
 
 
 class WAstar(BaseSolver):
-    r"""Weigthing A* algorithm. It's possible to use either static or dynamic
-    weighting. Both should reduce time needed to solve the puzzle."""
+    """
+    Weigthing A* algorithm.
+
+    It's possible to use either static or dynamic weighting. Both should
+    reduce time needed to solve the puzzle.
+    """
 
     def __init__(self, N, weight, mode="none"):
-        r"""If `mode` is anything but "static" or "dynamic" ValueError will be
+        """
+        Base constructor.
+
+        If `mode` is anything but "static" or "dynamic" ValueError will be
         raised. Static weighting will always multiply heuristics value with the
         same number. Dynamic weighting will reduce impact of heuristics value
         in deeper parts of search tree.
@@ -21,7 +24,8 @@ class WAstar(BaseSolver):
         Arguments:
             N (int): Size of puzzle.
             weight (number): Multiplier of heurstics.
-            mode (str): Either "dynamic" or "static"."""
+            mode (str): Either "dynamic" or "static".
+        """
 
         super().__init__(N)
 
@@ -34,17 +38,20 @@ class WAstar(BaseSolver):
         self._max_depth = 80 if N == 4 else 31
 
     def solve(self, start_state):
-        r"""Solving given puzzle. This implementation assumes that given
-        heurstics is consistent meaning that it's sufficient to relax distance
-        the moment it becomes possible and such action will never be possible
-        in the future. Manhattan distance is used.
+        """
+        Solving given puzzle.
+
+        This implementation assumes that given heurstics is consistent meaning
+        that it's sufficient to relax distance the moment it becomes possible
+        and such action will never be possible in the future. Manhattan
+        distance is used.
 
         Arguments:
             start_state (list or np.ndarray): Starting state.
-
         Returns:
-            flag, n_iters: Flag (True/False) if it's possible to solve the
-                puzzle and number of iterations in solving process."""
+            flag (bool): If puzzle is solvable.
+            n_iters (int): Number of iterations.
+        """
 
         self._start_state = serialize(start_state)
         n_iters = 0

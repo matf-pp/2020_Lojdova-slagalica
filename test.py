@@ -1,7 +1,5 @@
 import unittest
-import argparse
 import sys
-import os
 
 from src.Astar import Astar
 from src.WAstar import WAstar
@@ -20,8 +18,8 @@ if __name__ == "__main__":
         raise ValueError("Solver tag is inappropriate")
 
     callbacks = {
-        "astar": lambda N: Astar(N),
-        "idastar": lambda N: IDAstar(N),
+        "astar": Astar,
+        "idastar": IDAstar,
         "wastar_static": lambda N: WAstar(N, 4, mode="static"),
         "wastar_dynamic": lambda N: WAstar(N, 4, mode="dynamic")
     }
