@@ -42,6 +42,7 @@ class BaseSolver:
 
         Returns:
             iterable (zip): Tuples of states and weights.
+
         """
 
         def _is_valid(r, c):

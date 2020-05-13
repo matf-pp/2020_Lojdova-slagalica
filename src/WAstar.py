@@ -48,9 +48,11 @@ class WAstar(BaseSolver):
 
         Arguments:
             start_state (list or np.ndarray): Starting state.
+
         Returns:
             flag (bool): If puzzle is solvable.
             n_iters (int): Number of iterations.
+
         """
 
         self._start_state = serialize(start_state)
